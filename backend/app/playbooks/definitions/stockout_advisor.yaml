@@ -1,0 +1,22 @@
+id: stockout_advisor
+version: 1
+trigger:
+  signal_kinds: [stockout]
+  min_severity: 0.3
+goal: "Catch an item disappearing from the ledger before the week's revenue is lost"
+diagnosis_needs:
+  - item_gmv_trend
+  - supplier_lead_time_hint
+audience:
+  selector: none            # advice to the merchant, not a campaign to customers
+offer:
+  template: none
+channel: dashboard
+lang: hi
+copy_key: stockout_advice_hindi
+impact_model: planning_band_v1
+guardrails:
+  cost_cap_paise: 0         # spends nothing; cannot be abused
+measure:
+  window_days: 7
+  method: before_after_item_gmv

@@ -1,0 +1,9 @@
+# Vyapaar AI — MVP runtime deps
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.6
+PyYAML>=6.0
+numpy>=1.26
+
+# Optional: real LLM path (VYAPAAR_LLM=claude). The default scripted planner needs none of this.
+# anthropic>=1.0

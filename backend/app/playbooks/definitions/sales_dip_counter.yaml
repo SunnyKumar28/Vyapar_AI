@@ -1,0 +1,32 @@
+# §6 playbook. Signal -> playbook -> audience -> guardrails -> copy template.
+id: sales_dip_counter
+version: 1
+trigger:
+  signal_kinds: [sales_anomaly]
+  min_severity: 0.4
+  direction: drop          # spikes are opportunities, drops are fires — treat them first
+goal: "Stop a weekday-level sales drop within one week and recover the gap"
+diagnosis_needs:
+  - compare_same_dow       # yesterday vs the same weekday, never vs a flat daily average
+  - top_items_share        # did one item fall, or the whole basket?
+audience:
+  selector: lapsed_regulars
+  max_recipients: 1000
+offer:
+  template: flat_pct_off
+  pct: 10
+  cap_paise: 2000
+channel: whatsapp
+lang: hi
+copy_key: sales_dip_hindi
+impact_model: heuristic_winback_v1
+guardrails:
+  min_roi: 3.0
+  cost_cap_paise: 150000
+  frequency_cap_per_week: 2
+  audience_ceiling: 1000
+measure:
+  window_days: 7
+  method: diff_in_diff
+  control: matched_rfm_decile   # mid-lapsed regulars (31-44d), never messaged
+state_notes: "diagnose first: a drop caused by a stockout goes to stockout_advisor, not here"

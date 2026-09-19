@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vyapaar — Sharma Tea Stall</title>
+<style>
+  :root{
+    --canvas:#ecebe5; --paper:#fffefa; --paper-muted:#f6f4ee; --ink:#191815;
+    --muted:#625f58; --faint:#969189; --line:#dedbd2; --line-strong:#c8c3b8;
+    --accent:#5d63d8; --accent-ink:#4248ad; --accent-soft:#eeefff;
+    --green:#3f805d; --green-soft:#edf7f0; --clay:#b86b4a; --clay-soft:#fff1eb;
+    --danger:#a63838; --gold:#a2772b; --bad:#a63838; --warn:#a2772b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--canvas);color:var(--ink);font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{height:64px;display:flex;align-items:center;gap:12px;padding:0 32px;background:var(--paper);border-bottom:1px solid var(--line)}
+  .logo{width:31px;height:31px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font:700 15px Georgia,serif;color:var(--paper)}
+  h1{font:500 18px Georgia,"Times New Roman",serif;letter-spacing:-.015em;margin:0}.sub{color:var(--muted);font-size:11px}
+  .header-actions{display:flex;align-items:center;gap:22px;margin-left:auto}.live{font-size:11px;color:var(--muted)}.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px}
+  .clock{text-align:right;font-size:10px;color:var(--faint);line-height:1.25;text-transform:uppercase;letter-spacing:.08em}.clock b{display:block;color:var(--ink);font-size:11px;font-weight:600;letter-spacing:0;text-transform:none}
+  .wrap{max-width:1220px;margin:0 auto;padding:34px 32px 48px}
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:38px;align-items:end;padding:18px 0 36px;border-bottom:1px solid var(--line)}
+  .kicker{font:600 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin:0 0 18px}
+  .hero h2{font:500 clamp(38px,5vw,64px)/.98 Georgia,"Times New Roman",serif;letter-spacing:-.045em;margin:0;max-width:720px}.hero h2 em{color:var(--accent);font-style:italic}
+  .hero-copy{max-width:560px;color:var(--muted);font-size:16px;line-height:1.65;margin:20px 0 0}.hero-note{border-left:2px solid var(--accent);padding-left:16px;margin-bottom:6px}.hero-note .note-number{font:600 11px ui-monospace,monospace;color:var(--accent-ink)}.hero-note p{font-family:Georgia,serif;font-size:17px;line-height:1.35;margin:10px 0 0}
+  .summary-grid{display:grid;grid-template-columns:1.4fr 1fr .7fr;gap:14px;margin:18px 0;align-items:start}.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;overflow:auto;box-shadow:0 1px 2px #1c1b1808,0 10px 32px #1c1b1810}.card h2{font-size:10px;letter-spacing:.13em;color:var(--muted);margin:0 0 14px;text-transform:uppercase;font-weight:700}.card-head{display:flex;align-items:center;justify-content:space-between}.card-head .small-label{font:10px ui-monospace,monospace;color:var(--faint);text-transform:uppercase}
+  .sig{border-left:2px solid var(--gold);padding:8px 10px;margin:7px 0;background:#faf7ee;border-radius:5px}.sig .t{font-weight:600}.sig .k{color:var(--muted);font-size:11px;margin-top:2px}.sev{float:right;font-size:10px;padding:1px 6px;border-radius:10px;background:#f5ead0;color:#795616}.sev.hi{background:#fff0ef;color:var(--danger)}
+  .summary-card .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:0}.kpi{padding:5px 10px 5px 0;border-right:1px solid var(--line);text-align:left}.kpi:last-child{border-right:0;padding-left:10px}.kpi b{display:block;font:500 21px Georgia,serif}.kpi span{font-size:10px;color:var(--muted)}
+  .summary-card .row{font-size:11px;color:var(--muted)}
+  .workspace{display:grid;grid-template-columns:minmax(0,1fr) 286px;gap:14px;align-items:stretch}.side{display:flex;flex-direction:column;gap:14px;min-height:0}
+  .chat{display:flex;flex-direction:column;min-height:650px;padding:22px;background:var(--paper)}.chat-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:15px}.chat-top h2{font:500 27px Georgia,serif;letter-spacing:-.025em;text-transform:none;color:var(--ink);margin:0}.chat-sub{font-size:12px;color:var(--muted);margin-top:3px}
+  #log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:20px 5px 20px 0}.msg{max-width:76%;padding:11px 14px;border-radius:16px;white-space:pre-wrap}.me{align-self:flex-end;background:var(--ink);color:var(--paper)}.bot{align-self:flex-start;background:var(--paper-muted);border:1px solid var(--line)}
+  .step{align-self:flex-start;font-size:11px;color:var(--muted);background:var(--paper-muted);border:1px dashed var(--line);border-radius:8px;padding:5px 10px;font-family:ui-monospace,monospace}.step .tool{color:var(--accent-ink)}
+  .rx{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:14px;padding:16px;max-width:100%;width:520px}.rx h3{margin:0 0 2px;font:500 17px Georgia,serif}.rx .why{color:var(--muted);font-size:12px;margin-bottom:9px}.rx .row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line)}.rx .row b{font-variant-numeric:tabular-nums}
+  .band{display:flex;gap:7px;margin:10px 0}.band div{flex:1;text-align:center;background:var(--green-soft);border:1px solid #cce4d4;border-radius:9px;padding:7px}.band .lab{font-size:10px;color:var(--muted)}.btnrow{display:flex;gap:8px;margin-top:12px}
+  button{font:inherit;border-radius:999px;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);padding:8px 14px;cursor:pointer;transition:.15s ease}button:hover{border-color:var(--accent);color:var(--accent-ink)}button.primary{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:600}button.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}button:disabled{opacity:.45;cursor:default}
+  .language-select{border:1px solid var(--line-strong);border-radius:999px;background:var(--paper);color:var(--ink);padding:6px 28px 6px 10px;font:inherit;font-size:11px;outline:none}.language-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #5d63d820}
+  .bar{display:flex;gap:8px;padding:14px 0 0;border-top:1px solid var(--line)}.bar input{flex:1;background:var(--paper);border:1px solid var(--line-strong);border-radius:999px;color:var(--ink);padding:11px 15px;font:inherit;outline:none}.bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #5d63d820}.mic{width:42px;padding:8px}.tab{display:flex;gap:6px}.tab button{padding:5px 10px;font-size:11px}.tab button.on{background:var(--accent-soft);border-color:#cdd0ff;color:var(--accent-ink)}
+  .runs{flex:1}.runs .run{background:var(--paper-muted);border-radius:10px;padding:10px;margin:7px 0;cursor:pointer;border:1px solid transparent}.runs .run:hover{border-color:var(--accent)}.pill{font-size:10px;padding:1px 7px;border-radius:10px;background:#e8e6df;color:var(--muted)}.pill.ok{background:var(--green-soft);color:var(--green)}.pill.wait{background:#f5ead0;color:#795616}.pill.dead{background:#fff0ef;color:var(--danger)}
+  .track{font-family:ui-monospace,monospace;font-size:11px}.track .st{display:inline-block;padding:2px 6px;margin:2px;border-radius:5px;background:var(--paper-muted);border:1px solid var(--line);color:var(--muted)}.track .st.on,.track .st.done{background:var(--accent-soft);border-color:#cdd0ff;color:var(--accent-ink);font-weight:700}
+  .audit .row{font-size:11px;border-bottom:1px solid var(--line);padding:5px 2px;font-family:ui-monospace,monospace;cursor:pointer}.audit .row:hover{background:var(--paper-muted)}.audit .kind{color:var(--accent-ink)}
+  .demo{display:flex;flex-direction:column;gap:6px}.demo .note{font-size:10px;color:var(--muted)}.demo button{width:100%;font-size:12px;padding:6px}.utility{padding:0}.utility summary{cursor:pointer;padding:12px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.utility summary::marker{color:var(--accent)}.utility .demo{padding:0 14px 14px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 4px}.chips button{padding:5px 11px;font-size:11px;color:var(--muted);background:var(--paper);border-color:var(--line)}.chips button:hover{color:var(--accent-ink);border-color:var(--accent)}
+  .toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:#fff;border-radius:10px;padding:10px 15px;font-size:13px;display:none;max-width:340px}.nums{font-variant-numeric:tabular-nums}.sm2{font-size:11px;color:var(--muted)}
+  @media(max-width:1050px){.wrap{padding:24px 18px}.summary-grid{grid-template-columns:1fr 1fr}.summary-grid .utility{grid-column:1/-1}.workspace{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side .audit{grid-column:1/-1}}
+  @media(max-width:680px){header{padding:0 18px}.header-actions .live{display:none}.hero{grid-template-columns:1fr;padding-top:8px}.hero-note{display:none}.hero h2{font-size:43px}.hero-copy{font-size:15px}.summary-grid,.side{display:flex;flex-direction:column}.workspace{display:block}.chat{min-height:620px;margin-top:14px}.msg{max-width:88%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">व</div>
+  <div><h1 id="mname">Sharma Tea Stall</h1><div class="sub" id="msub">Vyapaar sales desk</div></div>
+  <div class="header-actions"><span class="live"><i></i><span data-i18n="liveLedger">Live ledger</span></span><div class="clock"><span data-i18n="dataAsOf">data as of</span><br/><b id="clock">—</b></div></div>
+</header>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <p class="kicker" data-i18n="kicker">Monday morning · sales desk</p>
+      <h2><span data-i18n="heroLine1">Know what moved.</span><br/><em data-i18n="heroLine2">Decide what&rsquo;s next.</em></h2>
+      <p class="hero-copy" data-i18n="heroCopy">A quiet view of your shop&rsquo;s numbers, customers, and next best move. Ask naturally — the desk will bring the evidence.</p>
+    </div>
+    <div class="hero-note"><span class="note-number">01</span><p data-i18n="heroNote">One clear answer at a time, with the numbers behind it.</p></div>
+  </section>
+  <section class="summary-grid">
+    <div class="card summary-card" id="briefcard"><div class="card-head"><h2 data-i18n="glance">At a glance</h2><span class="small-label" data-i18n="last30">Last 30 days</span></div><div id="brief">…</div></div>
+    <div class="card summary-card"><div class="card-head"><h2 data-i18n="signals">Signals to watch</h2><span class="small-label" data-i18n="sense">Sense</span></div><div id="signals">…</div></div>
+    <details class="card utility">
+      <summary data-i18n="moreTools">More tools</summary>
+      <div class="demo">
+        <button id="btn-scan"> ⟳ <span data-i18n="nightlyScan">Nightly scan (SENSE)</span></button>
+        <button id="btn-advance"> ⏩ <span data-i18n="advance7">Advance 7 days</span></button>
+        <button id="btn-measure"> 📊 <span data-i18n="measureOutcomes">Measure outcomes</span></button>
+        <button id="btn-report"> 🧾 <span data-i18n="weeklyReport">Weekly report card</span></button>
+        <div class="note" data-i18n="demoControls">Controls for the demo workspace.</div>
+      </div>
+    </details>
+  </section>
+  <section class="workspace">
+    <div class="card chat">
+      <div class="chat-top">
+        <div><h2 data-i18n="desk">Vyapaar desk</h2><div class="chat-sub" data-i18n="chatSub">Sales, forecasts, customers, stock — ask naturally</div></div>
+        <div class="tab"><select id="language" class="language-select" aria-label="Response language"></select><button id="v-tts" class="on">🔊 <span data-i18n="voice">voice</span></button></div>
+      </div>
+      <div class="chips" aria-label="Example questions">
+        <button data-q-key="nextWeek" data-i18n="nextWeekSales">अगले हफ्ते की बिक्री</button>
+        <button data-q-key="dip" data-i18n="dipQuestion">Dip आएगा?</button>
+        <button data-q-key="whatNext" data-i18n="whatNext">इस हफ्ते क्या करूं?</button>
+      </div>
+      <div id="log"></div>
+      <div class="bar">
+        <button class="mic" id="mic" title="बोलिए" data-i18n-title="speak">🎙</button>
+        <input id="inbox" data-i18n-placeholder="placeholder" placeholder="पूछिए: कल बिक्री कम क्यों लगी?" autocomplete="off"/>
+        <button class="primary" id="send" data-i18n="send">भेजें</button>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="card"><div class="card-head"><h2 data-i18n="approval">Needs your approval</h2><span class="small-label" data-i18n="act">Act</span></div><div id="pending">…</div></div>
+      <div class="card runs"><div class="card-head"><h2 data-i18n="tracking">Campaign tracking</h2><span class="small-label" data-i18n="measure">Measure</span></div><div id="runs">…</div></div>
+      <details class="card audit utility"><summary data-i18n="audit">Audit trail</summary><div id="audit">…</div></details>
+    </aside>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const $ = (s)=>document.querySelector(s);
+const INR = (p)=> "₹" + Math.round(p/100).toLocaleString("en-IN");
+const DEFAULT_LANGUAGES = [
+  ["en-IN", "English"], ["hi-IN", "Hindi"], ["bn-IN", "Bengali"], ["ta-IN", "Tamil"],
+  ["te-IN", "Telugu"], ["kn-IN", "Kannada"], ["ml-IN", "Malayalam"], ["mr-IN", "Marathi"],
+  ["gu-IN", "Gujarati"], ["pa-IN", "Punjabi"], ["od-IN", "Odia"],
+];
+let TTS = true, curTrace = null, seenAudit = 0, VOICE_PROVIDER = "browser", sessionId = null;
+let SELECTED_LANGUAGE = localStorage.getItem("vyapaar-language") || "en-IN";
+
+const EN_UI = {
+  liveLedger:"Live ledger", dataAsOf:"data as of", kicker:"Monday morning · sales desk",
+  heroLine1:"Know what moved.", heroLine2:"Decide what’s next.",
+  heroCopy:"A quiet view of your shop’s numbers, customers, and next best move. Ask naturally — the desk will bring the evidence.",
+  greeting:"Namaste Sharma ji. Yesterday’s sales looked low — ask me why.",
+  heroNote:"One clear answer at a time, with the numbers behind it.", glance:"At a glance",
+  last30:"Last 30 days", signals:"Signals to watch", sense:"Sense", moreTools:"More tools",
+  nightlyScan:"Nightly scan (SENSE)", advance7:"Advance 7 days", measureOutcomes:"Measure outcomes",
+  weeklyReport:"Weekly report card", demoControls:"Controls for the demo workspace.",
+  desk:"Vyapaar desk", chatSub:"Sales, forecasts, customers, stock — ask naturally",
+  voice:"voice", nextWeekSales:"Next week’s sales", dipQuestion:"Will there be a dip?",
+  whatNext:"What should I do this week?", speak:"Speak", placeholder:"Ask: Why were yesterday’s sales down?",
+  send:"Send", approval:"Needs your approval", act:"Act", tracking:"Campaign tracking",
+  measure:"Measure", audit:"Audit trail", sales30:"30-day sales", dailyAverage:"daily average",
+  transactions:"transactions", customers:"customers", repeatRate:"Repeat rate", regulars:"Regulars", lapsed:"lapsed",
+  peer:"Peer", spendWeek:"Spend this week", campaigns:"campaigns", scanPrompt:"Run a scan — no signals yet.",
+  approvalEmpty:"No approval pending. Ask the copilot: “Why were yesterday’s sales down?”",
+  runsEmpty:"No campaigns yet.", moreSignals:"more signals in the audit trail",
+  winback:"Win-back: lapsed regulars", audience:"Audience", offer:"Offer",
+  expectedGmv:"EXPECTED GMV", costCap:"SPEND CAP", roiMin:"MIN ROI", approve:"Approve",
+  dismiss:"Dismiss", nothingSent:"Nothing is sent until you tap approve.",
+  smallAudience:"Small audience — estimate is indicative.", tracker:"Tracker",
+  treated:"treated", control:"control", deliveries:"Deliveries", delivered:"delivered",
+  failed:"failed", result7:"7-day result", redemptions:"redemptions", followOn30:"30-day follow-on",
+  controlNote:"control = matched mid-lapsed regulars, never messaged — the counterfactual.",
+  weeklyReportCard:"Weekly report card", actionsRun:"actions run", recoveredRevenue:"recovered revenue",
+  blendedRoi:"blended ROI", repeatRateTreated:"Repeat rate (treated cohort)",
+  messagedReturned:"messaged customers came back within 30 days", liveMeasured:"live measured",
+  priorRuns:"prior runs", labelledSeparate:"labelled separately, never blended silently.",
+  languageToast:"Language", voiceReady:"voice ready", voiceFallback:"Voice unavailable; using browser voice.",
+  state_awaiting_approval:"awaiting approval", state_executing:"executing", state_executed:"executed",
+  state_measuring:"measuring", state_closed:"closed", state_dismissed:"dismissed",
+  networkError:"Network error", dismissed:"Dismissed. The copilot learns from the no.",
+  approved:"Approved.", blocked:"Blocked: ", error:"Error: "
+};
+const I18N = {
+  "en-IN": EN_UI,
+  "hi-IN": {liveLedger:"लाइव लेजर",dataAsOf:"डेटा के अनुसार",kicker:"सोमवार सुबह · बिक्री डेस्क",heroLine1:"क्या बदला।",heroLine2:"अब क्या करना है।",heroCopy:"आपकी दुकान की बिक्री, ग्राहक और अगला कदम — सब एक शांत नज़र में। स्वाभाविक रूप से पूछिए।",heroNote:"एक बार में एक साफ जवाब, पीछे के आंकड़ों के साथ।",glance:"एक नज़र में",last30:"पिछले 30 दिन",signals:"ध्यान देने योग्य संकेत",sense:"सेंस",moreTools:"और टूल",nightlyScan:"रात की स्कैन (सेंस)",advance7:"7 दिन आगे",measureOutcomes:"नतीजे मापें",weeklyReport:"साप्ताहिक रिपोर्ट कार्ड",demoControls:"डेमो वर्कस्पेस के कंट्रोल।",desk:"व्यापार डेस्क",chatSub:"बिक्री, अनुमान, ग्राहक, स्टॉक — स्वाभाविक रूप से पूछिए",voice:"आवाज़",nextWeekSales:"अगले हफ्ते की बिक्री",dipQuestion:"क्या बिक्री घटेगी?",whatNext:"इस हफ्ते क्या करूं?",speak:"बोलिए",placeholder:"पूछिए: कल बिक्री कम क्यों लगी?",send:"भेजें",approval:"आपकी मंज़ूरी चाहिए",act:"एक्शन",tracking:"कैम्पेन ट्रैकिंग",measure:"मापें",audit:"ऑडिट ट्रेल",sales30:"30-दिन की बिक्री",dailyAverage:"रोज़ का औसत",transactions:"लेन-देन",repeatRate:"दोबारा आने की दर",regulars:"नियमित ग्राहक",lapsed:"निष्क्रिय",peer:"साथी दुकानदार",spendWeek:"इस हफ्ते खर्च",campaigns:"कैम्पेन",scanPrompt:"स्कैन चलाइए — अभी कोई संकेत नहीं।",approvalEmpty:"कोई मंज़ूरी लंबित नहीं। पूछिए: “कल बिक्री कम क्यों लगी?”",runsEmpty:"अभी कोई कैम्पेन नहीं।",moreSignals:"और संकेत ऑडिट ट्रेल में",winback:"निष्क्रिय ग्राहकों को वापस लाएं",audience:"ग्राहक समूह",offer:"ऑफर",expectedGmv:"अनुमानित बिक्री",costCap:"खर्च सीमा",roiMin:"न्यूनतम ROI",approve:"मंज़ूर करें",dismiss:"हटाएं",nothingSent:"आपके मंज़ूर करने तक कुछ नहीं भेजा जाएगा।",smallAudience:"छोटा समूह — अनुमान संकेतात्मक है।",tracker:"ट्रैकर",treated:"ट्रीटमेंट",control:"कंट्रोल",deliveries:"डिलीवरी",delivered:"पहुंचे",failed:"असफल",result7:"7-दिन का नतीजा",redemptions:"रिडेम्पशन",followOn30:"30-दिन का नतीजा",controlNote:"कंट्रोल = मिलते-जुलते ग्राहक जिन्हें संदेश नहीं भेजा गया।",weeklyReportCard:"साप्ताहिक रिपोर्ट कार्ड",actionsRun:"एक्शन",recoveredRevenue:"वापस आई बिक्री",blendedRoi:"कुल ROI",repeatRateTreated:"ट्रीटेड ग्राहकों की रिपीट दर",messagedReturned:"मैसेज पाए ग्राहक 30 दिन में लौटे",liveMeasured:"लाइव नतीजा",priorRuns:"पिछले रन",labelledSeparate:"अलग-अलग दिखाया गया है।",languageToast:"भाषा",voiceReady:"आवाज़ तैयार",voiceFallback:"आवाज़ उपलब्ध नहीं; ब्राउज़र आवाज़ इस्तेमाल हो रही है।",networkError:"नेटवर्क समस्या",dismissed:"हटा दिया गया।",approved:"मंज़ूर हुआ।",blocked:"रुका हुआ: ",error:"समस्या: "},
+  "bn-IN": {liveLedger:"লাইভ লেজার",dataAsOf:"ডেটা অনুযায়ী",glance:"এক নজরে",last30:"গত ৩০ দিন",signals:"যে সংকেতগুলি দেখুন",moreTools:"আরও টুল",nightlyScan:"রাতের স্ক্যান",advance7:"৭ দিন এগিয়ে যান",measureOutcomes:"ফলাফল মাপুন",weeklyReport:"সাপ্তাহিক রিপোর্ট",desk:"ব্যবসা ডেস্ক",chatSub:"বিক্রি, পূর্বাভাস, গ্রাহক, স্টক — স্বাভাবিকভাবে জিজ্ঞেস করুন",voice:"ভয়েস",nextWeekSales:"আগামী সপ্তাহের বিক্রি",dipQuestion:"বিক্রি কমবে কি?",whatNext:"এই সপ্তাহে কী করব?",speak:"বলুন",placeholder:"জিজ্ঞেস করুন: গতকাল বিক্রি কম কেন?",send:"পাঠান",approval:"আপনার অনুমোদন দরকার",act:"অ্যাকশন",tracking:"ক্যাম্পেইন ট্র্যাকিং",measure:"মাপুন",audit:"অডিট ট্রেল",sales30:"৩০ দিনের বিক্রি",dailyAverage:"দৈনিক গড়",transactions:"লেনদেন",repeatRate:"আবার আসার হার",regulars:"নিয়মিত গ্রাহক",lapsed:"অনিয়মিত",peer:"সহকর্মী",spendWeek:"এই সপ্তাহের খরচ",campaigns:"ক্যাম্পেইন",approvalEmpty:"কোনও অনুমোদন অপেক্ষায় নেই।",runsEmpty:"এখনও কোনও ক্যাম্পেইন নেই।",approve:"অনুমোদন করুন",dismiss:"বাদ দিন",nothingSent:"আপনি অনুমোদন না করা পর্যন্ত কিছু পাঠানো হবে না।",tracker:"ট্র্যাকার",treated:"ট্রিটেড",control:"কন্ট্রোল",deliveries:"ডেলিভারি",delivered:"পৌঁছেছে",failed:"ব্যর্থ",weeklyReportCard:"সাপ্তাহিক রিপোর্ট কার্ড"},
+  "ta-IN": {liveLedger:"நேரடி லெட்ஜர்",dataAsOf:"தரவு நிலவரம்",glance:"ஒரு பார்வையில்",last30:"கடந்த 30 நாட்கள்",signals:"கவனிக்க வேண்டிய சிக்னல்கள்",moreTools:"மேலும் கருவிகள்",nightlyScan:"இரவு ஸ்கேன்",advance7:"7 நாட்கள் முன்னேறு",measureOutcomes:"முடிவுகளை அளவிடு",weeklyReport:"வாராந்திர அறிக்கை",desk:"வணிக மேசை",chatSub:"விற்பனை, கணிப்பு, வாடிக்கையாளர்கள், ஸ்டாக் — இயல்பாகக் கேளுங்கள்",voice:"குரல்",nextWeekSales:"அடுத்த வார விற்பனை",dipQuestion:"விற்பனை குறையுமா?",whatNext:"இந்த வாரம் என்ன செய்வது?",speak:"பேசுங்கள்",placeholder:"கேளுங்கள்: நேற்று விற்பனை ஏன் குறைந்தது?",send:"அனுப்பு",approval:"உங்கள் ஒப்புதல் தேவை",act:"செயல்",tracking:"கேம்பெயின் கண்காணிப்பு",measure:"அளவிடு",audit:"ஆடிட் பதிவு",sales30:"30 நாள் விற்பனை",dailyAverage:"தினசரி சராசரி",transactions:"பரிவர்த்தனைகள்",repeatRate:"மீண்டும் வரும் விகிதம்",regulars:"வழக்கமான வாடிக்கையாளர்கள்",lapsed:"வராதவர்கள்",peer:"சக வணிகர்கள்",spendWeek:"இந்த வார செலவு",campaigns:"கேம்பெயின்கள்",approvalEmpty:"ஒப்புதலுக்காக எதுவும் காத்திருக்கவில்லை.",runsEmpty:"இன்னும் கேம்பெயின் இல்லை.",approve:"ஒப்புதல்",dismiss:"நீக்கு",nothingSent:"நீங்கள் ஒப்புதல் தரும் வரை எதுவும் அனுப்பப்படாது.",tracker:"டிராக்கர்",treated:"சோதனை",control:"கட்டுப்பாடு",deliveries:"டெலிவரிகள்",delivered:"சென்றது",failed:"தோல்வி",weeklyReportCard:"வாராந்திர அறிக்கை அட்டை"},
+  "te-IN": {liveLedger:"లైవ్ లెడ్జర్",dataAsOf:"డేటా సమయం",glance:"ఒక చూపులో",last30:"గత 30 రోజులు",signals:"గమనించాల్సిన సంకేతాలు",moreTools:"మరిన్ని టూల్స్",nightlyScan:"రాత్రి స్కాన్",advance7:"7 రోజులు ముందుకు",measureOutcomes:"ఫలితాలు కొలవండి",weeklyReport:"వారపు నివేదిక",desk:"వ్యాపార డెస్క్",chatSub:"అమ్మకాలు, అంచనాలు, కస్టమర్లు, స్టాక్ — సహజంగా అడగండి",voice:"వాయిస్",nextWeekSales:"వచ్చే వారం అమ్మకాలు",dipQuestion:"అమ్మకాలు తగ్గుతాయా?",whatNext:"ఈ వారం ఏం చేయాలి?",speak:"మాట్లాడండి",placeholder:"అడగండి: నిన్న అమ్మకాలు ఎందుకు తగ్గాయి?",send:"పంపండి",approval:"మీ అనుమతి అవసరం",act:"చర్య",tracking:"క్యాంపెయిన్ ట్రాకింగ్",measure:"కొలవండి",audit:"ఆడిట్ ట్రెయిల్",sales30:"30 రోజుల అమ్మకాలు",dailyAverage:"రోజువారీ సగటు",transactions:"లావాదేవీలు",repeatRate:"మళ్లీ వచ్చే రేటు",regulars:"నియమిత కస్టమర్లు",lapsed:"రాని కస్టమర్లు",peer:"సహచర వ్యాపారులు",spendWeek:"ఈ వారం ఖర్చు",campaigns:"క్యాంపెయిన్లు",approvalEmpty:"అనుమతి కోసం ఏదీ వేచి లేదు.",runsEmpty:"ఇంకా క్యాంపెయిన్లు లేవు.",approve:"అనుమతించు",dismiss:"తీసివేయి",nothingSent:"మీరు అనుమతించే వరకు ఏదీ పంపబడదు.",tracker:"ట్రాకర్",treated:"ట్రీటెడ్",control:"కంట్రోల్",deliveries:"డెలివరీలు",delivered:"చేరింది",failed:"విఫలం",weeklyReportCard:"వారపు నివేదిక కార్డు"},
+  "kn-IN": {glance:"ಒಂದು ನೋಟದಲ್ಲಿ",last30:"ಕಳೆದ 30 ದಿನಗಳು",signals:"ಗಮನಿಸಬೇಕಾದ ಸಂಕೇತಗಳು",moreTools:"ಹೆಚ್ಚಿನ ಟೂಲ್‌ಗಳು",nightlyScan:"ರಾತ್ರಿ ಸ್ಕ್ಯಾನ್",advance7:"7 ದಿನ ಮುಂದೆ",measureOutcomes:"ಫಲಿತಾಂಶ ಅಳೆಯಿರಿ",weeklyReport:"ವಾರದ ವರದಿ",desk:"ವ್ಯಾಪಾರ ಡೆಸ್ಕ್",chatSub:"ಮಾರಾಟ, ಮುನ್ಸೂಚನೆ, ಗ್ರಾಹಕರು, ಸ್ಟಾಕ್ — ಸಹಜವಾಗಿ ಕೇಳಿ",voice:"ಧ್ವನಿ",nextWeekSales:"ಮುಂದಿನ ವಾರದ ಮಾರಾಟ",dipQuestion:"ಮಾರಾಟ ಇಳಿಯುತ್ತದೆಯೇ?",whatNext:"ಈ ವಾರ ಏನು ಮಾಡಬೇಕು?",speak:"ಮಾತನಾಡಿ",placeholder:"ಕೇಳಿ: ನಿನ್ನೆ ಮಾರಾಟ ಏಕೆ ಕಡಿಮೆಯಾಯಿತು?",send:"ಕಳುಹಿಸಿ",approval:"ನಿಮ್ಮ ಅನುಮತಿ ಬೇಕು",tracking:"ಕ್ಯಾಂಪೇನ್ ಟ್ರ್ಯಾಕಿಂಗ್",measure:"ಅಳೆಯಿರಿ",audit:"ಆಡಿಟ್ ಟ್ರೇಲ್",sales30:"30 ದಿನಗಳ ಮಾರಾಟ",dailyAverage:"ದೈನಂದಿನ ಸರಾಸರಿ",transactions:"ವಹಿವಾಟುಗಳು",repeatRate:"ಮರುಬರುವ ದರ",regulars:"ನಿಯಮಿತ ಗ್ರಾಹಕರು",lapsed:"ಬರದವರು",approve:"ಅನುಮತಿಸಿ",dismiss:"ತೆಗೆದುಹಾಕಿ",nothingSent:"ನೀವು ಅನುಮತಿಸುವವರೆಗೆ ಏನನ್ನೂ ಕಳುಹಿಸಲಾಗುವುದಿಲ್ಲ.",tracker:"ಟ್ರ್ಯಾಕರ್",weeklyReportCard:"ವಾರದ ವರದಿ ಕಾರ್ಡ್"},
+  "ml-IN": {glance:"ഒറ്റനോട്ടത്തിൽ",last30:"കഴിഞ്ഞ 30 ദിവസം",signals:"ശ്രദ്ധിക്കേണ്ട സൂചനകൾ",moreTools:"കൂടുതൽ ടൂളുകൾ",nightlyScan:"രാത്രി സ്കാൻ",advance7:"7 ദിവസം മുന്നോട്ട്",measureOutcomes:"ഫലങ്ങൾ അളക്കുക",weeklyReport:"ആഴ്ച റിപ്പോർട്ട്",desk:"വ്യാപാര ഡെസ്ക്",chatSub:"വിൽപ്പന, പ്രവചനം, ഉപഭോക്താക്കൾ, സ്റ്റോക്ക് — സ്വാഭാവികമായി ചോദിക്കൂ",voice:"ശബ്ദം",nextWeekSales:"അടുത്ത ആഴ്ചയിലെ വിൽപ്പന",dipQuestion:"വിൽപ്പന കുറയുമോ?",whatNext:"ഈ ആഴ്ച എന്ത് ചെയ്യണം?",speak:"സംസാരിക്കുക",placeholder:"ചോദിക്കൂ: ഇന്നലെ വിൽപ്പന കുറഞ്ഞത് എന്തുകൊണ്ട്?",send:"അയയ്ക്കുക",approval:"നിങ്ങളുടെ അനുമതി വേണം",tracking:"ക്യാമ്പെയ്ൻ ട്രാക്കിംഗ്",measure:"അളക്കുക",audit:"ഓഡിറ്റ് ട്രെയിൽ",sales30:"30 ദിവസത്തെ വിൽപ്പന",dailyAverage:"ദൈനംദിന ശരാശരി",transactions:"ഇടപാടുകൾ",repeatRate:"വീണ്ടും വരുന്ന നിരക്ക്",regulars:"പതിവ് ഉപഭോക്താക്കൾ",lapsed:"വരാത്തവർ",approve:"അനുമതിക്കുക",dismiss:"ഒഴിവാക്കുക",nothingSent:"നിങ്ങൾ അനുമതി നൽകുന്നതുവരെ ഒന്നും അയയ്ക്കില്ല.",tracker:"ട്രാക്കർ",weeklyReportCard:"ആഴ്ച റിപ്പോർട്ട് കാർഡ്"},
+  "mr-IN": {glance:"एका नजरेत",last30:"मागील 30 दिवस",signals:"लक्ष ठेवण्यासारखे संकेत",moreTools:"अधिक साधने",nightlyScan:"रात्रीचा स्कॅन",advance7:"7 दिवस पुढे",measureOutcomes:"निकाल मोजा",weeklyReport:"साप्ताहिक अहवाल",desk:"व्यवसाय डेस्क",chatSub:"विक्री, अंदाज, ग्राहक, स्टॉक — सहज विचारा",voice:"आवाज",nextWeekSales:"पुढील आठवड्याची विक्री",dipQuestion:"विक्री कमी होईल का?",whatNext:"या आठवड्यात काय करावे?",speak:"बोला",placeholder:"विचारा: काल विक्री कमी का झाली?",send:"पाठवा",approval:"तुमची मंजुरी हवी",tracking:"कॅम्पेन ट्रॅकिंग",measure:"मोजा",audit:"ऑडिट ट्रेल",sales30:"30 दिवसांची विक्री",dailyAverage:"दररोजची सरासरी",transactions:"व्यवहार",repeatRate:"पुन्हा येण्याचा दर",regulars:"नियमित ग्राहक",lapsed:"न येणारे",approve:"मंजूर करा",dismiss:"काढा",nothingSent:"तुम्ही मंजूर करेपर्यंत काहीही पाठवले जाणार नाही.",tracker:"ट्रॅकर",weeklyReportCard:"साप्ताहिक रिपोर्ट कार्ड"},
+  "gu-IN": {glance:"એક નજરમાં",last30:"છેલ્લા 30 દિવસ",signals:"ધ્યાન આપવા જેવા સંકેતો",moreTools:"વધુ સાધનો",nightlyScan:"રાત્રિ સ્કેન",advance7:"7 દિવસ આગળ",measureOutcomes:"પરિણામ માપો",weeklyReport:"સાપ્તાહિક રિપોર્ટ",desk:"વ્યવસાય ડેસ્ક",chatSub:"વેચાણ, આગાહી, ગ્રાહકો, સ્ટોક — સ્વાભાવિક રીતે પૂછો",voice:"અવાજ",nextWeekSales:"આવતા અઠવાડિયાનું વેચાણ",dipQuestion:"વેચાણ ઘટશે?",whatNext:"આ અઠવાડિયે શું કરવું?",speak:"બોલો",placeholder:"પૂછો: ગઈકાલે વેચાણ કેમ ઘટ્યું?",send:"મોકલો",approval:"તમારી મંજૂરી જરૂરી છે",tracking:"કેમ્પેઇન ટ્રેકિંગ",measure:"માપો",audit:"ઑડિટ ટ્રેલ",sales30:"30 દિવસનું વેચાણ",dailyAverage:"દૈનિક સરેરાશ",transactions:"વ્યવહારો",repeatRate:"ફરી આવવાનો દર",regulars:"નિયમિત ગ્રાહકો",lapsed:"ન આવતા ગ્રાહકો",approve:"મંજૂર કરો",dismiss:"દૂર કરો",nothingSent:"તમે મંજૂર કરો ત્યાં સુધી કંઈ મોકલાશે નહીં.",tracker:"ટ્રેકર",weeklyReportCard:"સાપ્તાહિક રિપોર્ટ કાર્ડ"},
+  "pa-IN": {glance:"ਇੱਕ ਨਜ਼ਰ ਵਿੱਚ",last30:"ਪਿਛਲੇ 30 ਦਿਨ",signals:"ਧਿਆਨ ਦੇਣ ਵਾਲੇ ਸੰਕੇਤ",moreTools:"ਹੋਰ ਟੂਲ",nightlyScan:"ਰਾਤ ਦਾ ਸਕੈਨ",advance7:"7 ਦਿਨ ਅੱਗੇ",measureOutcomes:"ਨਤੀਜੇ ਮਾਪੋ",weeklyReport:"ਹਫ਼ਤਾਵਾਰੀ ਰਿਪੋਰਟ",desk:"ਵਪਾਰ ਡੈਸਕ",chatSub:"ਵਿਕਰੀ, ਅਨੁਮਾਨ, ਗਾਹਕ, ਸਟਾਕ — ਕੁਦਰਤੀ ਤਰੀਕੇ ਨਾਲ ਪੁੱਛੋ",voice:"ਆਵਾਜ਼",nextWeekSales:"ਅਗਲੇ ਹਫ਼ਤੇ ਦੀ ਵਿਕਰੀ",dipQuestion:"ਕੀ ਵਿਕਰੀ ਘਟੇਗੀ?",whatNext:"ਇਸ ਹਫ਼ਤੇ ਕੀ ਕਰਨਾ ਹੈ?",speak:"ਬੋਲੋ",placeholder:"ਪੁੱਛੋ: ਕੱਲ੍ਹ ਵਿਕਰੀ ਘੱਟ ਕਿਉਂ ਹੋਈ?",send:"ਭੇਜੋ",approval:"ਤੁਹਾਡੀ ਮਨਜ਼ੂਰੀ ਚਾਹੀਦੀ ਹੈ",tracking:"ਕੈਂਪੇਨ ਟ੍ਰੈਕਿੰਗ",measure:"ਮਾਪੋ",audit:"ਆਡਿਟ ਟ੍ਰੇਲ",sales30:"30 ਦਿਨਾਂ ਦੀ ਵਿਕਰੀ",dailyAverage:"ਰੋਜ਼ਾਨਾ ਔਸਤ",transactions:"ਲੈਣ-ਦੇਣ",repeatRate:"ਮੁੜ ਆਉਣ ਦੀ ਦਰ",regulars:"ਨਿਯਮਤ ਗਾਹਕ",lapsed:"ਨਾ ਆਉਣ ਵਾਲੇ",approve:"ਮਨਜ਼ੂਰ ਕਰੋ",dismiss:"ਹਟਾਓ",nothingSent:"ਤੁਹਾਡੀ ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਿਨਾਂ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਵੇਗਾ।",tracker:"ਟ੍ਰੈਕਰ",weeklyReportCard:"ਹਫ਼ਤਾਵਾਰੀ ਰਿਪੋਰਟ ਕਾਰਡ"},
+  "od-IN": {glance:"ଗୋଟିଏ ନଜରରେ",last30:"ଗତ ୩୦ ଦିନ",signals:"ଦେଖିବାକୁ ଥିବା ସଙ୍କେତ",moreTools:"ଅଧିକ ଟୁଲ୍",nightlyScan:"ରାତି ସ୍କାନ୍",advance7:"୭ ଦିନ ଆଗକୁ",measureOutcomes:"ଫଳାଫଳ ମାପନ୍ତୁ",weeklyReport:"ସାପ୍ତାହିକ ରିପୋର୍ଟ",desk:"ବ୍ୟବସାୟ ଡେସ୍କ",chatSub:"ବିକ୍ରି, ପୂର୍ବାନୁମାନ, ଗ୍ରାହକ, ଷ୍ଟକ୍ — ସ୍ୱାଭାବିକ ଭାବେ ପଚାରନ୍ତୁ",voice:"ସ୍ୱର",nextWeekSales:"ଆସନ୍ତା ସପ୍ତାହର ବିକ୍ରି",dipQuestion:"ବିକ୍ରି କମିବ କି?",whatNext:"ଏହି ସପ୍ତାହରେ କଣ କରିବି?",speak:"କୁହନ୍ତୁ",placeholder:"ପଚାରନ୍ତୁ: ଗତକାଲି ବିକ୍ରି କାହିଁକି କମିଲା?",send:"ପଠାନ୍ତୁ",approval:"ଆପଣଙ୍କ ଅନୁମୋଦନ ଦରକାର",tracking:"କ୍ୟାମ୍ପେନ୍ ଟ୍ରାକିଂ",measure:"ମାପନ୍ତୁ",audit:"ଅଡିଟ୍ ଟ୍ରେଲ୍",sales30:"୩୦ ଦିନର ବିକ୍ରି",dailyAverage:"ଦୈନିକ ହାରାହାରି",transactions:"କାରବାର",repeatRate:"ପୁଣି ଆସିବା ହାର",regulars:"ନିୟମିତ ଗ୍ରାହକ",lapsed:"ନ ଆସୁଥିବା",approve:"ଅନୁମୋଦନ କରନ୍ତୁ",dismiss:"ହଟାନ୍ତୁ",nothingSent:"ଆପଣ ଅନୁମୋଦନ ନ କରିବା ପର୍ଯ୍ୟନ୍ତ କିଛି ପଠାଯିବ ନାହିଁ।",tracker:"ଟ୍ରାକର୍",weeklyReportCard:"ସାପ୍ତାହିକ ରିପୋର୍ଟ କାର୍ଡ"}
+};
+const QUESTION_TEMPLATES = {
+  "en-IN": {nextWeek:"What sales can I expect next week?", dip:"Will sales dip, and why?", whatNext:"What should I do this week?"},
+  "hi-IN": {nextWeek:"अगले हफ्ते तक कितनी बिक्री होगी?", dip:"क्या बिक्री घटेगी और क्यों?", whatNext:"इस हफ्ते मुझे क्या करना चाहिए?"},
+  "bn-IN": {nextWeek:"আগামী সপ্তাহে কত বিক্রি হতে পারে?", dip:"বিক্রি কমবে কি, এবং কেন?", whatNext:"এই সপ্তাহে আমার কী করা উচিত?"},
+  "ta-IN": {nextWeek:"அடுத்த வாரம் எவ்வளவு விற்பனை எதிர்பார்க்கலாம்?", dip:"விற்பனை குறையுமா, ஏன்?", whatNext:"இந்த வாரம் நான் என்ன செய்ய வேண்டும்?"},
+  "te-IN": {nextWeek:"వచ్చే వారం ఎంత అమ్మకాలు ఉండవచ్చు?", dip:"అమ్మకాలు తగ్గుతాయా, ఎందుకు?", whatNext:"ఈ వారం నేను ఏమి చేయాలి?"},
+  "kn-IN": {nextWeek:"ಮುಂದಿನ ವಾರ ಎಷ್ಟು ಮಾರಾಟ ನಿರೀಕ್ಷಿಸಬಹುದು?", dip:"ಮಾರಾಟ ಕಡಿಮೆಯಾಗುತ್ತದೆಯೇ, ಏಕೆ?", whatNext:"ಈ ವಾರ ನಾನು ಏನು ಮಾಡಬೇಕು?"},
+  "ml-IN": {nextWeek:"അടുത്ത ആഴ്ച എത്ര വിൽപ്പന പ്രതീക്ഷിക്കാം?", dip:"വിൽപ്പന കുറയുമോ, എന്തുകൊണ്ട്?", whatNext:"ഈ ആഴ്ച ഞാൻ എന്ത് ചെയ്യണം?"},
+  "mr-IN": {nextWeek:"पुढील आठवड्यात किती विक्री अपेक्षित आहे?", dip:"विक्री कमी होईल का, आणि का?", whatNext:"या आठवड्यात मी काय करावे?"},
+  "gu-IN": {nextWeek:"આવતા અઠવાડિયે કેટલું વેચાણ અપેક્ષિત છે?", dip:"વેચાણ ઘટશે, અને શા માટે?", whatNext:"આ અઠવાડિયે મારે શું કરવું?"},
+  "pa-IN": {nextWeek:"ਅਗਲੇ ਹਫ਼ਤੇ ਕਿੰਨੀ ਵਿਕਰੀ ਦੀ ਉਮੀਦ ਹੈ?", dip:"ਕੀ ਵਿਕਰੀ ਘਟੇਗੀ, ਅਤੇ ਕਿਉਂ?", whatNext:"ਮੈਨੂੰ ਇਸ ਹਫ਼ਤੇ ਕੀ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ?"},
+  "od-IN": {nextWeek:"ଆସନ୍ତା ସପ୍ତାହରେ କେତେ ବିକ୍ରି ହେବ ବୋଲି ଆଶା କରାଯାଉଛି?", dip:"ବିକ୍ରି କମିବ କି, ଏବଂ କାହିଁକି?", whatNext:"ଏହି ସପ୍ତାହରେ ମୁଁ କଣ କରିବି?"}
+};
+function t(key){ return (I18N[SELECTED_LANGUAGE]&&I18N[SELECTED_LANGUAGE][key]) || EN_UI[key] || key; }
+I18N["hi-IN"].greeting="नमस्ते शर्मा जी। कल की बिक्री कम लगी — पूछिए क्यों।";
+function stateLabel(state){ return t("state_" + state) || state.replaceAll("_"," "); }
+function applyUiLanguage(){
+  document.documentElement.lang=SELECTED_LANGUAGE;
+  document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));
+  document.querySelectorAll("[data-i18n-title]").forEach(el=>el.title=t(el.dataset.i18nTitle));
+  const questions=QUESTION_TEMPLATES[SELECTED_LANGUAGE] || QUESTION_TEMPLATES["en-IN"];
+  document.querySelectorAll("[data-q-key]").forEach(el=>el.dataset.q=questions[el.dataset.qKey]);
+  const selected=$("#language"); if(selected) selected.value=SELECTED_LANGUAGE;
+}
+applyUiLanguage();
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3500); }
+async function api(path, opts){ const r = await fetch(path, Object.assign({headers:{"Content-Type":"application/json"}},opts||{})); if(!r.ok) throw new Error((await r.json().catch(()=>({detail:r.statusText}))).detail||"error"); return r.json(); }
+
+/* ---------- dashboard ---------- */
+async function loadDash(){
+  const d = await api("/v1/merchants/me/dashboard");
+  $("#mname").textContent = d.merchant.name;
+  $("#msub").textContent = `${d.merchant.vertical} · ${d.merchant.city} ${d.merchant.pincode} · ${d.merchant.open_hours}`;
+  const asOf = /(?:Z|[+-]\d\d:\d\d)$/.test(d.as_of) ? d.as_of : d.as_of + "Z";
+  $("#clock").textContent = new Date(asOf).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) + " IST";
+  const b = d.brief, s = b.sales_30d;
+  $("#brief").innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><b>${INR(s.gmv_paise)}</b><span>${t("sales30")}</span></div>
+      <div class="kpi"><b>${INR(s.avg_daily_gmv_paise)}</b><span>${t("dailyAverage")}</span></div>
+      <div class="kpi"><b class="nums">${s.txns.toLocaleString("en-IN")}</b><span>${t("transactions")}</span></div>
+    </div>
+    <div class="row sm2" style="margin-top:8px;display:flex;justify-content:space-between">
+      <span>${t("repeatRate")} <b class="nums">${Math.round(b.repeat_rate_30d.repeat_rate*100)}%</b></span>
+      <span>${t("regulars")} <b class="nums">${b.customers.regulars}</b> · ${t("lapsed")} <b class="nums">${b.customers.lapsed_regulars}</b></span>
+    </div>
+    ${b.benchmark && !b.benchmark.suppressed ? `<div class="sm2" style="margin-top:6px">${t("peer")} ${b.benchmark.vertical}s (${b.benchmark.cohort_size}, k≥20): ${t("repeatRate").toLowerCase()} ${Math.round(b.benchmark.repeat_rate*100)}%</div>`:""}
+    <div class="sm2" style="margin-top:8px">${t("spendWeek")} <b>${INR(d.guardrails.spend_this_week_paise)}</b> / ${INR(d.guardrails.spend_cap_week_paise)} · ${t("campaigns")} <b>${d.guardrails.campaigns_this_week}</b>/${d.guardrails.campaigns_cap_week}</div>`;
+  const visibleSignals = d.signals.slice(0, 3);
+  $("#signals").innerHTML = visibleSignals.length ? visibleSignals.map(sig => `
+    <div class="sig" style="border-color:${sig.severity>0.6?"var(--bad)":"var(--warn)"}">
+      <span class="sev ${sig.severity>0.6?"hi":""}">sev ${sig.severity.toFixed(2)}</span>
+      <div class="t">${sig.payload.title||sig.kind}</div>
+      <div class="k">${sig.kind} · ${sig.detected_at.slice(0,10)}</div>
+    </div>`).join("") + (d.signals.length > 3 ? `<div class="sm2" style="margin-top:8px">+ ${d.signals.length - 3} ${t("moreSignals")}</div>` : "") : `<div class="sm2">${t("scanPrompt")}</div>`;
+  $("#pending").innerHTML = d.pending_approvals.length ? d.pending_approvals.map(renderPending).join("") :
+    `<div class="sm2">${t("approvalEmpty")}</div>`;
+  $("#runs").innerHTML = d.runs.length ? d.runs.slice(0,8).map(runRow).join("") : `<div class="sm2">${t("runsEmpty")}</div>`;
+  d.runs.slice(0,8).forEach(bindRunRow);
+  d.pending_approvals.forEach(bindApproval);
+  loadAudit();
+}
+
+function renderPending(p){
+  const pr = p.prescription, imp = pr.impact, band = imp.gmv_influenced_band_paise;
+  return `<div class="rx" data-run="${p.run_id}">
+    <h3>${pr.playbook === "winback_lapsed_regulars" ? t("winback") : pr.playbook}</h3>
+    <div class="why">${pr.headline||""}</div>
+    <div class="row"><span>${t("audience")}</span><b class="nums">${pr.audience_size} ${t("customers")}</b></div>
+    <div class="row"><span>${t("offer")}</span><b>10% off (max ₹20) · WhatsApp</b></div>
+    <div class="band">
+      <div><div class="lab">${t("expectedGmv")}</div><b>${INR(band[0])}–${INR(band[1])}</b></div>
+      <div><div class="lab">${t("costCap")}</div><b>${INR(imp.cost_cap_paise)}</b></div>
+      <div><div class="lab">${t("roiMin")}</div><b>${imp.projected_roi_low}×</b></div>
+    </div>
+    <div class="btnrow">
+      <button class="primary" data-ap="y">✓ ${t("approve")}</button>
+      <button data-ap="n">✕ ${t("dismiss")}</button>
+    </div>
+    <div class="sm2" style="margin-top:6px">${t("nothingSent")} ${imp.confidence === "indicative" ? t("smallAudience") : ""}</div>
+  </div>`;
+}
+function bindApproval(p){
+  const el = document.querySelector(`.rx[data-run="${p.run_id}"]`);
+  if(!el) return;
+  el.querySelectorAll("button[data-ap]").forEach(btn => btn.onclick = async () => {
+    el.querySelectorAll("button").forEach(b=>b.disabled=true);
+    try{
+      if(btn.dataset.ap === "y"){
+        const out = await api(`/v1/approvals/${p.run_id}/approve`, {method:"POST", body:JSON.stringify({token:p.approval_token, actor:"merchant", reason:"tap-approve"})});
+        const ex = out.execution || {};
+        toast(ex.delivered !== undefined ? `Sent: ${ex.delivered} delivered${ex.failed?` · ${ex.failed} failed`:""} · cost ${INR(ex.cost_paise||0)}` : (out.execution&&out.execution.blocked) ? "Blocked: "+out.execution.blocked : "Approved.");
+        if(ex.delivered !== undefined) botSay(`Bhej diya! ${ex.delivered} customers ko message gaya (${ex.failed} fail). Ab 7 din ka result dekhte hain — "Advance 7 days" dabao.`);
+      } else {
+        await api(`/v1/approvals/${p.run_id}/reject`, {method:"POST", body:JSON.stringify({actor:"merchant", reason:"dismissed"})});
+        toast("Dismissed. The copilot learns from the no.");
+      }
+    }catch(e){ toast("Error: "+e.message); }
+    loadDash();
+  });
+}
+function runRow(r){
+  const st = {awaiting_approval:"wait", executing:"wait", executed:"ok", measuring:"wait", closed:"ok", dismissed:"dead"}[r.state]||"wait";
+  return `<div class="run" data-run="${r.run_id}">
+    <div style="display:flex;justify-content:space-between"><b>${r.playbook}</b><span class="pill ${st}">${stateLabel(r.state)}</span></div>
+    <div class="sm2">${r.created_at.slice(0,16).replace("T"," ")} · ${r.prescription.audience_size||0} ${t("customers")}</div>
+  </div>`;
+}
+function bindRunRow(r){
+  const el = document.querySelector(`.run[data-run="${r.run_id}"]`);
+  if(el) el.onclick = ()=>showTracker(r.run_id);
+}
+async function showTracker(runId){
+  const trackerData = await api(`/v1/runs/${runId}/tracker`);
+  const chain = ["detected","diagnosed","prescribed","awaiting_approval","executing","executed","measuring","closed"];
+  const idx = chain.indexOf(trackerData.run.state);
+  const o7 = trackerData.outcomes.find(o=>o.window_d===7), o30 = trackerData.outcomes.find(o=>o.window_d===30);
+  const dlv = Object.fromEntries(trackerData.deliveries.map(d=>[d.status,d.n]));
+  botCard(`<h3>${t("tracker")} · ${trackerData.run.playbook}</h3>
+    <div class="track" style="margin:6px 0">${chain.map((s,i)=>`<span class="st ${i<idx?"done":i===idx?"on":""}">${stateLabel(s)}</span>`).join("→")}${trackerData.run.state==="dismissed"?`<span class="st done" style="border-color:#e5534b;color:#ff8182">${t("state_dismissed")}</span>`:""}</div>
+    <div class="row"><span>${t("audience")}</span><b class="nums">${trackerData.cohort_sizes.treatment} ${t("treated")} · ${trackerData.cohort_sizes.control} ${t("control")}</b></div>
+    <div class="row"><span>${t("deliveries")}</span><b class="nums">${dlv.delivered||dlv.sent||0} ${t("delivered")} · ${dlv.failed||0} ${t("failed")}</b></div>
+    ${o7?`<div class="row"><span>${t("result7")} (DiD)</span><b class="nums" style="color:var(--good)">${INR(o7.gmv_influenced_paise)} · ${o7.redemptions} ${t("redemptions")} · ROI ${o7.roi}×</b></div>`:""}
+    ${o30?`<div class="row"><span>${t("followOn30")}</span><b class="nums">${INR(o30.gmv_influenced_paise)}</b></div>`:""}
+    <div class="sm2">${t("controlNote")}</div>`);
+}
+async function loadAudit(){
+  const rows = await api(`/v1/audit?limit=60`);
+  $("#audit").innerHTML = rows.slice(0,18).map(r=>`<div class="row" data-tr="${r.trace_id||""}"><span class="kind">${r.kind}</span> ${r.payload.tool||r.payload.action||r.payload.job||r.payload.decision||r.payload.signal||""} <span style="float:right;color:var(--dim)">${r.ts.slice(11,19)}</span></div>`).join("");
+  $("#audit").querySelectorAll(".row[data-tr]").forEach(el=>el.onclick=async()=>{
+    const tr = el.dataset.tr; if(!tr) return;
+    const full = await api(`/v1/audit?trace_id=${tr}&limit=100`);
+    botCard(`<h3>Trace ${tr}</h3>${full.map(x=>`<div style="margin:4px 0"><span class="kind" style="color:var(--paytm)">${x.kind}</span> <span style="word-break:break-all">${JSON.stringify(x.payload).slice(0,220)}</span></div>`).join("")}`);
+  });
+}
+
+/* ---------- chat ---------- */
+const log = $("#log");
+function el(html){ const d=document.createElement("div"); d.innerHTML=html; return d.firstChild; }
+function meSay(t){ log.appendChild(el(`<div class="msg me">${t}</div>`)); scroll(); }
+function botSay(t, shouldSpeak=true){ log.appendChild(el(`<div class="msg bot">${t}</div>`)); scroll(); if(shouldSpeak) speak(t); }
+function botCard(inner){ const c = el(`<div class="rx">${inner}</div>`); log.appendChild(c); scroll(); return c; }
+function scroll(){ log.scrollTop = log.scrollHeight; }
+let speaking = false, sarvamAudio = null, pendingSarvamAudio = null;
+async function send(msg){
+  if(!msg) return;
+  meSay(msg);
+  const ctrl = new AbortController();
+  try{
+    const r = await fetch("/v1/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg,session_id:sessionId,language_code:SELECTED_LANGUAGE}),signal:ctrl.signal});
+    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf="";
+    while(true){
+      const {done,value} = await reader.read(); if(done) break;
+      buf += dec.decode(value,{stream:true});
+      let i;
+      while((i = buf.indexOf("\n\n")) >= 0){
+        const line = buf.slice(0,i).trim(); buf = buf.slice(i+2);
+        if(!line.startsWith("data:")) continue;
+        const e = JSON.parse(line.slice(5));
+        if(e.type==="done") sessionId = e.session_id || sessionId;
+        else if(e.type==="tool_call") { /* tool trace stays in the audit drawer */ }
+        else if(e.type==="tool_result") { /* keep the conversation focused on the answer */ }
+        else if(e.type==="card"){
+          const c = botCard(renderPending({run_id:e.card.run_id, approval_token:e.card.approval_token, prescription:e.card.prescription}));
+          bindApproval({run_id:e.card.run_id, approval_token:e.card.approval_token, prescription:e.card.prescription});
+          const pr=e.card.prescription, band=pr.impact.gmv_influenced_band_paise;
+          c.querySelector(".btnrow").innerHTML = `<div class="sm2">☝ upar card me approve karo</div>`;
+        }
+        else if(e.type==="final"){ botSay(e.text); curTrace = e.trace_id; }
+      }
+    }
+  }catch(err){ botSay("Network error: "+err.message); }
+  loadDash();
+}
+$("#send").onclick = ()=>{ const v=$("#inbox").value; $("#inbox").value=""; send(v); };
+$("#inbox").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#send").click(); });
+document.querySelectorAll("[data-q]").forEach(btn=>btn.onclick=()=>send(btn.dataset.q));
+
+/* voice: Sarvam when configured, browser APIs otherwise */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false, sarvamRecorder = null, sarvamStream = null, sarvamChunks = [];
+if(SR){ rec = new SR(); rec.lang=SELECTED_LANGUAGE; rec.interimResults=false;
+  rec.onresult = (ev)=>{ const t = ev.results[0][0].transcript; $("#inbox").value = t; send(t); };
+  rec.onend = ()=>{ listening=false; $("#mic").style.background="var(--panel2)"; };
+}
+function browserListen(){
+  if(!rec){ toast("Voice input needs Chrome/Safari."); return; }
+  if(listening){ rec.stop(); return; }
+  rec.lang=SELECTED_LANGUAGE; listening=true; $("#mic").style.background="#0e3a5c"; rec.start(); toast("सुन रहा हूँ… बोलिए");
+}
+async function sarvamListen(){
+  if(!navigator.mediaDevices || !window.MediaRecorder){ browserListen(); return; }
+  if(listening){ sarvamRecorder&&sarvamRecorder.stop(); return; }
+  try{
+    sarvamStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    const mime = ["audio/webm;codecs=opus","audio/webm","audio/mp4"].find(x=>MediaRecorder.isTypeSupported(x)) || "";
+    sarvamRecorder = mime ? new MediaRecorder(sarvamStream,{mimeType:mime}) : new MediaRecorder(sarvamStream);
+    sarvamChunks=[]; listening=true; $("#mic").style.background="#0e3a5c";
+    sarvamRecorder.ondataavailable = e=>{ if(e.data.size) sarvamChunks.push(e.data); };
+    sarvamRecorder.onstop = async ()=>{
+      listening=false; $("#mic").style.background="var(--panel2)";
+      sarvamStream&&sarvamStream.getTracks().forEach(t=>t.stop());
+      const type=sarvamRecorder.mimeType||"audio/webm", ext=type.includes("mp4")?"mp4":"webm";
+      const blob=new Blob(sarvamChunks,{type}); toast("समझ रहा हूँ…");
+      try{
+        const r=await fetch("/v1/voice/transcribe",{method:"POST",headers:{"Content-Type":type,"X-Audio-Filename":`voice.${ext}`,"X-Language-Code":SELECTED_LANGUAGE},body:blob});
+        const out=await r.json(); if(!r.ok) throw new Error(out.detail||"transcription failed");
+        $("#inbox").value=out.text; send(out.text);
+      }catch(e){ toast("Voice error: "+e.message); }
+    };
+    sarvamRecorder.start(); toast("सुन रहा हूँ… बोलिए, फिर mic दबाएँ");
+  }catch(e){ listening=false; $("#mic").style.background="var(--panel2)"; toast("Microphone permission needed."); }
+}
+$("#mic").onclick = ()=>{ if(VOICE_PROVIDER==="sarvam") sarvamListen(); else browserListen(); };
+function stopSarvamAudio(){
+  if(sarvamAudio){ sarvamAudio.pause(); sarvamAudio.src=""; sarvamAudio=null; }
+  if(pendingSarvamAudio){ pendingSarvamAudio.pause(); pendingSarvamAudio.src=""; pendingSarvamAudio=null; }
+}
+async function playPendingSarvamAudio(){
+  if(!pendingSarvamAudio) return;
+  const audio=pendingSarvamAudio; pendingSarvamAudio=null;
+  try{ await audio.play(); sarvamAudio=audio; }catch(e){ pendingSarvamAudio=audio; }
+}
+document.addEventListener("click", ()=>{ if(VOICE_PROVIDER==="sarvam") playPendingSarvamAudio(); });
+async function speak(t){
+  if(!TTS) return;
+  if(VOICE_PROVIDER==="sarvam"){
+    const selectedCode=$("#language")?.value || SELECTED_LANGUAGE;
+    try{
+      stopSarvamAudio();
+      const r=await fetch("/v1/voice/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t,language_code:selectedCode})});
+      if(!r.ok) throw new Error((await r.json().catch(()=>({}))).detail||"speech failed");
+      const audio=new Audio(URL.createObjectURL(await r.blob()));
+      audio.onended=()=>{ URL.revokeObjectURL(audio.src); if(sarvamAudio===audio) sarvamAudio=null; };
+      sarvamAudio=audio;
+      try{ await audio.play(); return; }
+      catch(e){ pendingSarvamAudio=audio; sarvamAudio=null; toast("Tap once to play the selected-language voice."); return; }
+    }catch(e){ toast("Sarvam TTS unavailable: "+e.message); return; }
+  }
+  if(!window.speechSynthesis) return;
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang=$("#language")?.value || SELECTED_LANGUAGE; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){}
+}
+$("#v-tts").onclick = ()=>{ if(pendingSarvamAudio) playPendingSarvamAudio(); TTS=!TTS; $("#v-tts").classList.toggle("on",TTS); if(!TTS){ stopSarvamAudio(); if(window.speechSynthesis) speechSynthesis.cancel(); } };
+function setLanguages(languages){
+  const select=$("#language");
+  const rows=(languages&&languages.length?languages:DEFAULT_LANGUAGES.map(([code,name])=>({code,name})));
+  select.innerHTML=rows.map(x=>'<option value="' + x.code + '">' + x.name + '</option>').join("");
+  if(!rows.some(x=>x.code===SELECTED_LANGUAGE)) SELECTED_LANGUAGE="en-IN";
+  select.value=SELECTED_LANGUAGE;
+  applyUiLanguage();
+}
+$("#language").onchange = e=>{
+  SELECTED_LANGUAGE=e.target.value; localStorage.setItem("vyapaar-language",SELECTED_LANGUAGE);
+  stopSarvamAudio();
+  if(rec) rec.lang=SELECTED_LANGUAGE;
+  applyUiLanguage(); loadDash();
+  toast(t("languageToast") + ": " + e.target.options[e.target.selectedIndex].text);
+};
+
+/* ---------- demo controls ---------- */
+$("#btn-scan").onclick = async ()=>{ const r = await api("/v1/jobs/signals/scan",{method:"POST"}); toast(`Scan: ${r.fired} signals`); loadDash(); };
+$("#btn-advance").onclick = async ()=>{
+  toast("7 din aage… redemptions hote hain");
+  const a = await api("/v1/demo/advance",{method:"POST",body:JSON.stringify({days:7})});
+  const m = await api("/v1/jobs/measure",{method:"POST"});
+  const lines = (a.materialized||[]).filter(x=>x.events).map(x=>`${x.events} ${x.kind} events`);
+  toast("7 din beet gaye" + (lines.length? " · "+lines.join(", "):""));
+  const rep = await api("/v1/report/weekly"); showReport(rep);
+  loadDash();
+};
+$("#btn-measure").onclick = async ()=>{ const m = await api("/v1/jobs/measure",{method:"POST"}); const rep = await api("/v1/report/weekly"); showReport(rep); loadDash(); };
+$("#btn-report").onclick = async ()=> showReport(await api("/v1/report/weekly"));
+function showReport(rep){
+  const h = rep.headline, rr = rep.repeat_rate, treated = rr.treated_cohort_30d;
+  botCard(`<h3>${t("weeklyReportCard")}</h3>
+    <div class="kpis" style="margin:8px 0">
+      <div class="kpi"><b class="nums">${h.actions_run}</b><span>${t("actionsRun")}</span></div>
+      <div class="kpi"><b style="color:var(--good)">${INR(h.recovered_revenue_paise.total)}</b><span>${t("recoveredRevenue")}</span></div>
+      <div class="kpi"><b class="nums">${h.blended_roi??0}×</b><span>${t("blendedRoi")}</span></div>
+    </div>
+    ${treated?`<div class="row"><span>${t("repeatRateTreated")}</span><b class="nums">${Math.round(treated.baseline*100)}% → ${Math.round(treated.rate*100)}%</b></div>
+    <div class="sm2">${treated.returned}/${treated.cohort} ${t("messagedReturned")} · ${treated.baseline_note}</div>`:""}
+    <div class="sm2" style="margin-top:6px">${t("liveMeasured")} ${INR(h.recovered_revenue_paise.live_measured)} · ${t("priorRuns")} ${INR(h.recovered_revenue_paise.seeded_history)} — ${t("labelledSeparate")}</div>
+    ${rep.runs.map(r=>`<div class="row"><span>${r.playbook} <span class="pill ${r.confidence==="measured"?"ok":"wait"}">${r.confidence}</span></span><b class="nums">${INR(r.gmv_influenced_paise)} · ROI ${r.roi??0}×</b></div>`).join("")}`);
+  speak("Report taiyaar hai.");
+}
+
+/* boot: the Monday-morning moment */
+async function initVoice(){
+  try{
+    const v=await api("/v1/voice/status"); VOICE_PROVIDER=v.provider; setLanguages(v.languages);
+    if(VOICE_PROVIDER==="sarvam") toast(`Sarvam voice ready · ${v.tts_model}`);
+  }catch(e){ VOICE_PROVIDER="browser"; setLanguages(); }
+}
+Promise.all([loadDash(),initVoice()]).then(()=>{
+  botSay(t("greeting"), false);
+});
+</script>
+</body>
+</html>

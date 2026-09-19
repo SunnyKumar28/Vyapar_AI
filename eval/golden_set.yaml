@@ -1,0 +1,54 @@
+# §14 eval harness. Every case runs the REAL loop (tools, guardrails, audit) and is graded
+# on behaviour, not vibes: which tools it used, what MUST/MUST-NOT appear in the answer.
+# A case fails loudly; the harness prints a table and exits nonzero on any failure.
+cases:
+  - id: sales_dip_diagnosis
+    user: "kal bikri kam kyu lagi?"
+    intent: sales
+    tools_must: [get_merchant_brief, detect_anomalies, list_lapsed_customers, estimate_impact, request_approval]
+    answer_must_contain: ["₹8,200", "₹10,000", "18%", "212", "₹4,800", "₹6,500", "₹1,100"]
+    answer_must_not_contain: ["cust_", "₹8,199", "₹6,100"]      # no PII, no invented precision, no outcome promised
+    card_expected: true
+
+  - id: winback_direct
+    user: "grahak wapas lao, 45 din se nahi aa rahe"
+    intent: winback
+    tools_must: [list_lapsed_customers, estimate_impact]
+    answer_must_contain: ["212"]
+    answer_must_not_contain: ["cust_"]
+    card_expected: true
+
+  - id: stock_question
+    user: "stock kaisa hai, kya khatam ho gaya?"
+    intent: stock
+    tools_must: [get_merchant_brief, get_store_insights]
+    answer_must_contain: ["samosa", "62", "86"]
+    answer_must_not_contain: ["cust_"]
+    card_expected: false
+
+  - id: top_item_question
+    user: "sabse zyada kya bikta hai?"
+    intent: insights
+    tools_must: [get_merchant_brief, get_store_insights]
+    answer_must_contain: ["tea", "₹"]
+    answer_must_not_contain: ["cust_"]
+    card_expected: false
+
+  - id: weekly_report
+    user: "hafta ka report do"
+    intent: report
+    tools_must: [get_merchant_brief]
+    answer_must_contain: ["₹"]
+    answer_must_not_contain: ["cust_"]
+
+  - id: nonsense_stays_humble
+    user: "mujhe gana gao"
+    intent: sales
+    tools_must: [get_merchant_brief]
+    answer_must_not_contain: ["cust_", "₹99"]    # must not invent numbers to be interesting
+    card_expected: false
+
+gates:                       # §14 model gates, asserted at eval time
+  churn_auc_min: 0.75
+  benchmark_k_floor: 20
+  forecast_needs_days: 35

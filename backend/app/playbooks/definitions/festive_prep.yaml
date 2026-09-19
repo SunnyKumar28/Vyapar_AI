@@ -1,0 +1,28 @@
+id: festive_prep
+version: 1
+trigger:
+  signal_kinds: [festive]
+  min_severity: 0.3
+goal: "Ramp stock, staff and a festive offer before the demand window opens"
+diagnosis_needs:
+  - forecast_gate           # model ships only if it beats the moving-average baseline
+  - last_year_festive_gmv
+audience:
+  selector: all_regulars
+  max_recipients: 1000
+offer:
+  template: festive_combo
+  cap_paise: 3000
+channel: whatsapp
+lang: hi
+copy_key: festive_hindi
+impact_model: planning_band_v1
+guardrails:
+  min_roi: 2.0
+  cost_cap_paise: 150000
+  frequency_cap_per_week: 2
+  audience_ceiling: 1000
+measure:
+  window_days: 30
+  method: diff_in_diff
+  control: matched_rfm_decile   # mid-lapsed regulars (31-44d), never messaged

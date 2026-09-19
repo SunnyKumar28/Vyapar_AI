@@ -1,0 +1,10 @@
+.env
+.venv
+.build
+.codex-finalizer
+artifacts
+out
+__pycache__
+*.pyc
+*.db-shm
+*.db-wal

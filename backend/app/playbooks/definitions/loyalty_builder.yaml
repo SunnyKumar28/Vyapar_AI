@@ -1,0 +1,27 @@
+id: loyalty_builder
+version: 1
+trigger:
+  signal_kinds: [benchmark_gap]
+  min_severity: 0.3
+goal: "Close the repeat-rate gap vs peer shops in the same pincode"
+diagnosis_needs:
+  - repeat_rate_vs_peers    # k>=20 anonymised cohort only
+  - top_decile_behaviour
+audience:
+  selector: active_regulars   # reward the ones who DO come back — grow frequency, not reach
+  max_recents: 1000
+  max_recipients: 1000
+offer:
+  template: stamp_card      # "5th visit free" — loyalty, not discounting
+channel: whatsapp
+lang: hi
+copy_key: loyalty_hindi
+impact_model: planning_band_v1
+guardrails:
+  min_roi: 1.5              # loyalty compounds; a lower bar is honest
+  cost_cap_paise: 150000
+  frequency_cap_per_week: 2
+  audience_ceiling: 1000
+measure:
+  window_days: 30
+  method: cohort_repeat_rate

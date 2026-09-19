@@ -1,0 +1,171 @@
+{
+  "_comment": [
+    "Scripted demo merchant (BUILD_PLAN \u00a713.3). Every number the deck's slide 9 shows is",
+    "derived from the values below, so the detectors fire on real data instead of fixtures.",
+    "Change a value here and `python -m eval.verify_demo` will tell you what broke."
+  ],
+  "merchant": {
+    "merchant_id": 1042,
+    "name": "Sharma Tea Stall",
+    "vertical": "tea_stall",
+    "city": "Jaipur",
+    "pincode": "302001",
+    "open_hours": "06:00-21:00",
+    "lang": "hi",
+    "phone": "9829040012",
+    "owner": "Mahesh Sharma"
+  },
+  "history_days": 90,
+  "avg_ticket_paise": 3500,
+  "items": [
+    "tea",
+    "samosa",
+    "bun-maska",
+    "kachori",
+    "lassi",
+    "biscuit"
+  ],
+  "inventory_risk_item": "samosa",
+  "inventory": {
+    "tea": {"unit_cost_paise": 600, "supplier": "Jaipur Tea Co.", "restock_days": 1, "coverage_days": 3.5, "safety_days": 1.5},
+    "samosa": {"unit_cost_paise": 1200, "supplier": "Sharma Snacks Kitchen", "restock_days": 1, "coverage_days": 1.2, "safety_days": 1.0},
+    "bun-maska": {"unit_cost_paise": 1400, "supplier": "Pink City Bakery", "restock_days": 2, "coverage_days": 3.0, "safety_days": 1.5},
+    "kachori": {"unit_cost_paise": 1300, "supplier": "Sharma Snacks Kitchen", "restock_days": 1, "coverage_days": 3.0, "safety_days": 1.5},
+    "lassi": {"unit_cost_paise": 1800, "supplier": "Madhur Dairy", "restock_days": 1, "coverage_days": 3.0, "safety_days": 1.5},
+    "biscuit": {"unit_cost_paise": 900, "supplier": "Rajasthan Distributors", "restock_days": 3, "coverage_days": 4.0, "safety_days": 2.0}
+  },
+  "targets": {
+    "_comment": "The five figures the anomaly detector and the brief must reproduce.",
+    "avg_daily_gmv_paise_30d": 910000,
+    "last_sunday_gmv_paise": 820000,
+    "sunday_baseline_paise": 1000000,
+    "sunday_delta_pct": -0.18,
+    "repeat_rate_30d": 0.22,
+    "lapsed_regulars": 212
+  },
+  "sundays_paise": {
+    "_comment": "Days-before-T -> pinned Sunday GMV. T is a Monday, so d=1 is yesterday (Sunday). d=8/15/22/29 average to exactly 1000000, so yesterday reads -18%.",
+    "1": 820000,
+    "8": 980000,
+    "15": 1010000,
+    "22": 1020000,
+    "29": 990000
+  },
+  "cohorts": {
+    "_comment": [
+      "regulars_count in the brief = active + mid_lapsed (last visit within 45d) = 480.",
+      "Gap bands avoid days 31 and 45: those are the trigger boundaries, where the hour of the",
+      "visit decides which side of the cutoff a customer lands on."
+    ],
+    "active_regulars": 330,
+    "mid_lapsed_control_pool": 150,
+    "mid_lapsed_gap_days": [
+      32,
+      44
+    ],
+    "lapsed_regulars": 212,
+    "lapsed_gap_days": [
+      46,
+      75
+    ],
+    "walkins_30d": 1170,
+    "regular_min_visits": 3
+  },
+  "post_campaign": {
+    "_comment": [
+      "Consumed by actions/connectors/world_sim.py when the win-back campaign executes.",
+      "redemption_gmv_paise_7d and control_gmv_paise_7d are chosen so the diff-in-diff lands",
+      "on exactly 610000 paise:  728720 - 212*(84000/150) = 610000."
+    ],
+    "delivery_rate": 0.9623,
+    "redemptions_7d": 31,
+    "redemption_gmv_paise_7d": 728720,
+    "control_returners_7d": 4,
+    "control_gmv_paise_7d": 84000,
+    "treated_repeat_customers_30d": 66,
+    "followon_avg_ticket_paise": 21500
+  },
+  "seeded_history": {
+    "_comment": "Five already-closed runs so the weekly report card has a track record. Their outcome rows are labelled source=seeded_history; run #6 is measured live from transactions.",
+    "runs": [
+      {
+        "playbook": "loyalty_builder",
+        "days_ago": 74,
+        "gmv_influenced_paise": 420000,
+        "redemptions": 48,
+        "delivered": 305,
+        "cost_paise": 61000
+      },
+      {
+        "playbook": "winback_lapsed_regulars",
+        "days_ago": 60,
+        "gmv_influenced_paise": 310000,
+        "redemptions": 22,
+        "delivered": 168,
+        "cost_paise": 77600
+      },
+      {
+        "playbook": "stockout_advisor",
+        "days_ago": 45,
+        "gmv_influenced_paise": 285000,
+        "redemptions": 0,
+        "delivered": 1,
+        "cost_paise": 0
+      },
+      {
+        "playbook": "festive_prep",
+        "days_ago": 31,
+        "gmv_influenced_paise": 265000,
+        "redemptions": 19,
+        "delivered": 240,
+        "cost_paise": 86000
+      },
+      {
+        "playbook": "udhaar_collections",
+        "days_ago": 17,
+        "gmv_influenced_paise": 250000,
+        "redemptions": 11,
+        "delivered": 62,
+        "cost_paise": 12400
+      }
+    ],
+    "total_gmv_influenced_paise": 1530000
+  },
+  "universe": {
+    "_comment": [
+      "Background merchants exist so benchmarks are real anonymised aggregates, not constants.",
+      "200 = 5 verticals x 2 pincodes x 20, so every benchmark cell has cohort_size 20 and clears",
+      "the k>=20 anonymity floor exactly. The demo merchant is excluded from its own cell."
+    ],
+    "merchants": 200,
+    "verticals": [
+      "tea_stall",
+      "kirana",
+      "salon",
+      "restaurant",
+      "pharmacy"
+    ],
+    "pincodes_per_vertical": 2,
+    "txns_per_day": [
+      18,
+      34
+    ],
+    "competitor_shock_merchants": 30,
+    "competitor_shock_day": 12,
+    "benchmark_repeat_rate": {
+      "tea_stall": 0.38,
+      "kirana": 0.41,
+      "salon": 0.29,
+      "restaurant": 0.26,
+      "pharmacy": 0.44
+    },
+    "history_days": 35,
+    "avg_ticket_paise": {
+      "tea_stall": 3500,
+      "kirana": 18000,
+      "salon": 45000,
+      "restaurant": 32000,
+      "pharmacy": 26000
+    }
+  }
+}

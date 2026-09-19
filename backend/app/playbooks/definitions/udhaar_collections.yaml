@@ -1,0 +1,22 @@
+id: udhaar_collections
+version: 1
+trigger:
+  signal_kinds: [collections]
+  min_severity: 0.3
+goal: "Politely collect past-due udhaar without costing the merchant a customer"
+diagnosis_needs:
+  - past_due_reminders
+audience:
+  selector: none            # reminders are one-to-one, never bulk
+offer:
+  template: none
+channel: whatsapp
+lang: hi
+copy_key: udhaar_hindi
+impact_model: planning_band_v1
+guardrails:
+  cost_cap_paise: 20000      # gentle nudges only
+  frequency_cap_per_week: 4 # one follow-up per customer per few days
+measure:
+  window_days: 7
+  method: collected_amount

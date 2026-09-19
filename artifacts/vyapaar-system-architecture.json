@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Vyapaar AI system architecture",
+    "quality_profile": "showcase",
+    "viewBox": [1180, 680],
+    "views": [
+      {
+        "id": "merchant-loop",
+        "label": "Merchant decision loop",
+        "focus": ["merchant", "dashboard", "api", "agent", "data", "policy", "connector", "outcomes"],
+        "note": "Trace a request from a merchant question through evidence, approval, execution, and measured outcomes."
+      },
+      {
+        "id": "voice-path",
+        "label": "Voice and language path",
+        "focus": ["merchant", "dashboard", "api", "sarvam"],
+        "note": "The selected BCP-47 language code flows with chat, speech-to-text, and text-to-speech requests."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "merchant",
+      "type": "external",
+      "label": "Merchant",
+      "sublabel": "web and voice",
+      "pos": [40, 300],
+      "size": [128, 64]
+    },
+    {
+      "id": "dashboard",
+      "type": "frontend",
+      "label": "Vyapaar dashboard",
+      "sublabel": "language selector and chat",
+      "pos": [225, 300],
+      "size": [152, 64]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI application",
+      "sublabel": "chat, voice, dashboard APIs",
+      "pos": [435, 300],
+      "size": [160, 64]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Agent and tool loop",
+      "sublabel": "allowlisted data tools",
+      "pos": [650, 300],
+      "size": [152, 64]
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "Merchant data store",
+      "sublabel": "ledger, inventory, memory",
+      "pos": [865, 300],
+      "size": [150, 64]
+    },
+    {
+      "id": "sarvam",
+      "type": "external",
+      "label": "Sarvam AI",
+      "sublabel": "chat, STT, TTS",
+      "pos": [435, 105],
+      "size": [150, 64]
+    },
+    {
+      "id": "policy",
+      "type": "security",
+      "label": "Policy and approvals",
+      "sublabel": "caps, quiet hours, signed consent",
+      "pos": [650, 105],
+      "size": [172, 64]
+    },
+    {
+      "id": "audit",
+      "type": "security",
+      "label": "Audit trail",
+      "sublabel": "prompt, tool, action trace",
+      "pos": [865, 105],
+      "size": [150, 64]
+    },
+    {
+      "id": "connector",
+      "type": "external",
+      "label": "Campaign connector",
+      "sublabel": "WhatsApp mock in prototype",
+      "pos": [650, 500],
+      "size": [168, 64]
+    },
+    {
+      "id": "outcomes",
+      "type": "backend",
+      "label": "Outcome measurement",
+      "sublabel": "matched control and ROI",
+      "pos": [865, 500],
+      "size": [150, 64]
+    }
+  ],
+  "connections": [
+    {"id": "merchant-dashboard", "from": "merchant", "to": "dashboard", "label": "question and approval", "labelDy": 56, "variant": "emphasis"},
+    {"id": "dashboard-api", "from": "dashboard", "to": "api", "label": "HTTPS and SSE", "labelDy": 56, "variant": "emphasis"},
+    {"id": "api-agent", "from": "api", "to": "agent", "label": "language code and request", "labelDy": 56},
+    {"id": "agent-data", "from": "agent", "to": "data", "label": "grounded tool reads", "labelDy": 56},
+    {"id": "api-sarvam", "from": "api", "to": "sarvam", "label": "LLM, STT, TTS", "fromSide": "top", "toSide": "bottom", "variant": "emphasis"},
+    {"id": "agent-policy", "from": "agent", "to": "policy", "label": "approval gate", "labelAt": [690, 245], "fromSide": "top", "toSide": "bottom", "variant": "security"},
+    {"id": "agent-audit", "from": "agent", "to": "audit", "label": "trace events", "labelAt": [850, 225], "fromSide": "right", "toSide": "bottom", "via": [[835, 332], [835, 240], [940, 240]], "variant": "security"},
+    {"id": "policy-connector", "from": "policy", "to": "connector", "label": "approved campaign", "labelAt": [920, 600], "fromSide": "top", "toSide": "bottom", "via": [[736, 60], [1050, 60], [1050, 600], [734, 600]], "variant": "security"},
+    {"id": "connector-outcomes", "from": "connector", "to": "outcomes", "label": "delivery and redemption events", "labelDy": -26, "variant": "dashed"},
+    {"id": "outcomes-data", "from": "outcomes", "to": "data", "label": "measured result", "fromSide": "top", "toSide": "bottom", "variant": "dashed"}
+  ],
+  "cards": [
+    {"dot": "violet", "title": "Grounded answers", "items": ["The model can call only registered tools", "Sales, inventory, and customer facts come from merchant data"]},
+    {"dot": "rose", "title": "Safe action", "items": ["Policy code checks cost, frequency, audience, and quiet hours", "A signed merchant approval precedes every customer contact"]},
+    {"dot": "emerald", "title": "Measured learning", "items": ["Delivery events and redemptions feed outcome measurement", "Each decision retains an audit trail and outcome evidence"]}
+  ]
+}
