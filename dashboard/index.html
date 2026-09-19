@@ -448,6 +448,10 @@ $("#btn-advance").onclick = async ()=>{
 $("#btn-measure").onclick = async ()=>{ const m = await api("/v1/jobs/measure",{method:"POST"}); const rep = await api("/v1/report/weekly"); showReport(rep); loadDash(); };
 $("#btn-report").onclick = async ()=> showReport(await api("/v1/report/weekly"));
 async function csvForUpload(file){
+  const signature=new Uint8Array(await file.slice(0,4).arrayBuffer());
+  if(signature[0]===0x50&&signature[1]===0x4b&&signature[2]===0x03&&signature[3]===0x04){
+    throw new Error("This file is an Excel workbook, not CSV. In Excel: File → Save As → CSV UTF-8, then upload that exported file.");
+  }
   const text=await file.text();
   if(file.size<=3*1024*1024) return {text,sampled:false,sourceRows:null};
   const lines=text.split(/\r?\n/).filter(line=>line.trim());
@@ -474,7 +478,8 @@ $("#btn-import").onclick = async ()=>{
   const button=$("#btn-import"); button.disabled=true; button.textContent="Importing…";
   try{
     const response=await fetch("/v1/import/transactions",{method:"POST",headers:{"Content-Type":"text/csv","X-Merchant-Name":$("#merchant-name").value.trim()||"My business"},body:upload.text});
-    const result=await response.json();
+    const raw=await response.text(); let result;
+    try{ result=JSON.parse(raw); }catch(_){ throw new Error(response.ok?"The server returned an invalid response.":(raw||"Import failed.")); }
     if(!response.ok) throw new Error(result.detail||"Import failed");
     toast(`Imported ${result.imported.toLocaleString("en-IN")} rows${upload.sampled?" · representative sample":""}${result.skipped?` · skipped ${result.skipped}`:""}.`);
     botSay(`Your CSV is ready: ${result.imported.toLocaleString("en-IN")} sales rows were imported${upload.sampled?" as a representative sample":""}. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);

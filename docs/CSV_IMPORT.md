@@ -24,7 +24,8 @@ Optional columns improve analysis:
 ## Public dataset workflow
 
 For the [UCI Online Retail dataset](https://archive.ics.uci.edu/dataset/352/online+retail),
-download the workbook, save a smaller 3 MB CSV sample with `InvoiceDate`, `CustomerID`,
+download the workbook, open it in Excel or Google Sheets, then use **File → Save As → CSV UTF-8**.
+Do not merely rename the `.xlsx` file to `.csv`. Save a smaller 3 MB CSV sample with `InvoiceDate`, `CustomerID`,
 `Description`, `Quantity`, and `UnitPrice`, then select **Bring your data** in the app.
 
 The importer understands this schema directly. UCI data is UK-based, so use it to

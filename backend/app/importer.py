@@ -111,16 +111,22 @@ def _columns(rows: list[dict[str, str]]) -> list[dict[str, str]]:
 def parse_csv(raw: bytes) -> tuple[list[ImportedRow], int]:
     if not raw:
         raise CsvImportError("Choose a non-empty CSV file.")
+    if raw.startswith(b"PK\x03\x04"):
+        raise CsvImportError("This is an Excel workbook, not a CSV. Open it in Excel or Google Sheets and export it as CSV UTF-8 before importing.")
     if len(raw) > MAX_BYTES:
         raise CsvImportError("CSV is over 3 MB. Export a smaller date range (up to 25,000 rows).")
     try:
         text = raw.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
         raise CsvImportError("Use a UTF-8 CSV file.") from exc
-    reader = csv.DictReader(io.StringIO(text))
-    if not reader.fieldnames:
-        raise CsvImportError("The CSV needs a header row.")
-    rows = _columns(list(reader))
+    try:
+        # newline="" is required by Python's csv module for CRLF files and quoted cells.
+        reader = csv.DictReader(io.StringIO(text, newline=""))
+        if not reader.fieldnames:
+            raise CsvImportError("The CSV needs a header row.")
+        rows = _columns(list(reader))
+    except csv.Error as exc:
+        raise CsvImportError("This CSV has malformed line breaks or quotes. Re-export it as CSV UTF-8 from Excel or Google Sheets.") from exc
     if len(rows) > MAX_ROWS:
         raise CsvImportError("CSV has more than 25,000 rows. Export a smaller date range.")
 

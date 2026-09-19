@@ -299,6 +299,13 @@ def init_db(path: Path | None = None) -> sqlite3.Connection:
         shutil.copy2(bundled, target)
     conn = connect(target)
     conn.executescript(DDL)
+    # Git deployments do not include the developer's ignored SQLite seed file. A
+    # fresh serverless instance must still render an import-ready workspace.
+    if not conn.execute("SELECT 1 FROM merchants WHERE merchant_id = ?", (settings.demo_merchant_id,)).fetchone():
+        conn.execute(
+            "INSERT OR IGNORE INTO merchants(merchant_id,name,vertical,city,pincode,open_hours,lang,phone_tok,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            (settings.demo_merchant_id, "Import your data", "retail", "Your workspace", "000000", "Upload a CSV", "en", "import-ready", iso(utcnow())),
+        )
     return conn
 
 
