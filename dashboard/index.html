@@ -82,7 +82,7 @@
         <input class="csv-field" id="merchant-name" maxlength="80" placeholder="Business name" aria-label="Business name"/>
         <input class="csv-field" id="csv-file" type="file" accept=".csv,text/csv" aria-label="Sales CSV file"/>
         <button id="btn-import">↑ Import sales CSV</button>
-        <div class="note">Use date, customer ID, sales amount or quantity + unit price, and optional product/payment columns.</div>
+        <div class="note">Use date, customer ID, sales amount or quantity + unit price, and optional product/payment columns. Files over 3 MB are sampled locally for analysis.</div>
         <div class="import-warning">This replaces the demo workspace. Customer IDs are tokenized; contacts are not imported.</div>
       </div>
     </details>
@@ -447,18 +447,37 @@ $("#btn-advance").onclick = async ()=>{
 };
 $("#btn-measure").onclick = async ()=>{ const m = await api("/v1/jobs/measure",{method:"POST"}); const rep = await api("/v1/report/weekly"); showReport(rep); loadDash(); };
 $("#btn-report").onclick = async ()=> showReport(await api("/v1/report/weekly"));
+async function csvForUpload(file){
+  const text=await file.text();
+  if(file.size<=3*1024*1024) return {text,sampled:false,sourceRows:null};
+  const lines=text.split(/\r?\n/).filter(line=>line.trim());
+  if(lines.length<2) throw new Error("CSV needs a header and at least one row.");
+  const header=lines[0], rows=lines.slice(1), maxBytes=2800*1024;
+  const wanted=Math.min(25000, rows.length), chosen=[header]; let bytes=new TextEncoder().encode(header+"\n").length;
+  for(let n=0;n<wanted;n++){
+    const line=rows[Math.min(rows.length-1,Math.floor(n*rows.length/wanted))];
+    const next=new TextEncoder().encode(line+"\n").length;
+    if(bytes+next>maxBytes) break;
+    chosen.push(line); bytes+=next;
+  }
+  if(chosen.length===1) throw new Error("Rows are too large to sample. Export essential columns only.");
+  return {text:chosen.join("\n")+"\n",sampled:true,sourceRows:rows.length};
+}
 $("#btn-import").onclick = async ()=>{
   const file=$("#csv-file").files[0];
   if(!file){ toast("Choose a CSV file first."); return; }
-  if(file.size>3*1024*1024){ toast("CSV is over 3 MB. Export a smaller date range."); return; }
-  if(!confirm("Replace the current demo workspace with this CSV?")) return;
+  let upload;
+  try{ upload=await csvForUpload(file); }catch(error){ toast("Import error: "+error.message); return; }
+  const sampleRows=upload.text.split(/\r?\n/).filter(Boolean).length-1;
+  const sampleNote=upload.sampled?` This 25 MB+ file will use ${sampleRows.toLocaleString("en-IN")} representative rows from ${upload.sourceRows.toLocaleString("en-IN")}; the original stays on this device.`:"";
+  if(!confirm("Replace the current demo workspace with this CSV?"+sampleNote)) return;
   const button=$("#btn-import"); button.disabled=true; button.textContent="Importing…";
   try{
-    const response=await fetch("/v1/import/transactions",{method:"POST",headers:{"Content-Type":"text/csv","X-Merchant-Name":$("#merchant-name").value.trim()||"My business"},body:await file.text()});
+    const response=await fetch("/v1/import/transactions",{method:"POST",headers:{"Content-Type":"text/csv","X-Merchant-Name":$("#merchant-name").value.trim()||"My business"},body:upload.text});
     const result=await response.json();
     if(!response.ok) throw new Error(result.detail||"Import failed");
-    toast(`Imported ${result.imported.toLocaleString("en-IN")} rows${result.skipped?` · skipped ${result.skipped}`:""}.`);
-    botSay(`Your CSV is ready: ${result.imported.toLocaleString("en-IN")} sales rows were imported. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);
+    toast(`Imported ${result.imported.toLocaleString("en-IN")} rows${upload.sampled?" · representative sample":""}${result.skipped?` · skipped ${result.skipped}`:""}.`);
+    botSay(`Your CSV is ready: ${result.imported.toLocaleString("en-IN")} sales rows were imported${upload.sampled?" as a representative sample":""}. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);
     loadDash();
   }catch(error){ toast("Import error: "+error.message); }
   finally{ button.disabled=false; button.textContent="↑ Import sales CSV"; }

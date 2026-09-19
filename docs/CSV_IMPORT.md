@@ -1,8 +1,11 @@
 # Bring your own sales data
 
-Vyapaar AI accepts a UTF-8 CSV of up to 3 MB / 25,000 rows. Importing replaces the
-single demo workspace only; it does not touch other merchants. It tokenizes customer
-identifiers before writing the ledger and never imports contact details for messaging.
+Vyapaar AI accepts a UTF-8 CSV of up to 3 MB / 25,000 rows. Larger files (including a
+25 MB export) are sampled evenly in the browser before upload; the original file stays
+on the user's device and the dashboard explicitly labels the result as a representative
+sample. Importing replaces the single demo workspace only; it does not touch other
+merchants. It tokenizes customer identifiers before writing the ledger and never imports
+contact details for messaging.
 
 ## Required data
 
