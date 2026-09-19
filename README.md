@@ -8,6 +8,15 @@ learn, no jargon, no numbers that cannot be traced to a tool call.
 
 **Demo:** `./run.sh` → http://localhost:8642 · full walkthrough in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 
+## Start with the tea stall, then bring your own data
+
+The default workspace is **Sharma Tea Stall**: it is the complete, reproducible
+mentor-demo story. Use **Bring your data** to upload a transaction CSV and it
+becomes the active workspace, so chat answers, signals and forecasts are based
+on that uploaded ledger. Use **Restore tea-stall demo** at any time to return to
+the original scenario. Imports are single-workspace and replace the previous
+active data; customer identifiers are tokenized before storage.
+
 ## What the loop does (all of it live, from data)
 
 | Stage | What happens | Proof |

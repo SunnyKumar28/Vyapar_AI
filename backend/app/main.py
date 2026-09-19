@@ -50,6 +50,24 @@ def _mid() -> int:
     return settings.demo_merchant_id
 
 
+def _bootstrap_tea_stall_if_needed() -> None:
+    """Seed the Sharma Tea Stall on an empty serverless instance.
+
+    The public app starts with the narrated tea-stall scenario. An uploaded CSV
+    deliberately replaces only this single workspace; the explicit reset route
+    below restores the scenario whenever the merchant wants the demo back.
+    """
+    has_transactions = q1("SELECT 1 FROM transactions WHERE merchant_id = ? LIMIT 1", (_mid(),))
+    if has_transactions:
+        return
+    from datagen.generate import main as generate_demo
+    generate_demo()
+    detectors.scan(_mid())
+
+
+_bootstrap_tea_stall_if_needed()
+
+
 # ------------------------------------------------------------------ chat (SSE)
 
 class ChatIn(BaseModel):

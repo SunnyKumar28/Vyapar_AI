@@ -1,7 +1,7 @@
 {
   "functions": {
     "index.py": {
-      "includeFiles": "{dashboard/**,vyapaar.db,datagen/scenarios/**,backend/app/playbooks/definitions/**}",
+      "includeFiles": "{dashboard/**,datagen/**,backend/app/playbooks/definitions/**}",
       "maxDuration": 60
     }
   }

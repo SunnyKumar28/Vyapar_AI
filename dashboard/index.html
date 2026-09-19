@@ -69,6 +69,7 @@
     <details class="card utility">
       <summary data-i18n="moreTools">More tools</summary>
       <div class="demo">
+        <button id="btn-reset">↺ Restore tea-stall demo</button>
         <button id="btn-scan"> ⟳ <span data-i18n="nightlyScan">Nightly scan (SENSE)</span></button>
         <button id="btn-advance"> ⏩ <span data-i18n="advance7">Advance 7 days</span></button>
         <button id="btn-measure"> 📊 <span data-i18n="measureOutcomes">Measure outcomes</span></button>
@@ -83,7 +84,7 @@
         <input class="csv-field" id="csv-file" type="file" accept=".csv,text/csv" aria-label="Sales CSV file"/>
         <button id="btn-import">↑ Import sales CSV</button>
         <div class="note">Use date, customer ID, sales amount or quantity + unit price, and optional product/payment columns. Files over 3 MB are sampled locally for analysis.</div>
-        <div class="import-warning">This replaces the demo workspace. Customer IDs are tokenized; contacts are not imported.</div>
+        <div class="import-warning">This switches the active workspace from the tea-stall demo to your data. Customer IDs are tokenized; contacts are not imported. You can restore the tea-stall demo anytime.</div>
       </div>
     </details>
   </section>
@@ -435,6 +436,17 @@ $("#language").onchange = e=>{
 };
 
 /* ---------- demo controls ---------- */
+$("#btn-reset").onclick = async ()=>{
+  if(!confirm("Restore the Sharma Tea Stall demo? Your currently imported CSV workspace will be replaced.")) return;
+  const button=$("#btn-reset"); button.disabled=true; button.textContent="Restoring tea-stall demo…";
+  try{
+    await api("/v1/demo/reset",{method:"POST"});
+    toast("Sharma Tea Stall restored. Your questions now use the tea-stall demo data.");
+    botSay("Sharma Tea Stall is active again. Ask why Sunday sales dipped, which regulars are lapsed, or what action to take next.", false);
+    loadDash();
+  }catch(error){ toast("Could not restore the tea-stall demo: "+error.message); }
+  finally{ button.disabled=false; button.textContent="↺ Restore tea-stall demo"; }
+};
 $("#btn-scan").onclick = async ()=>{ const r = await api("/v1/jobs/signals/scan",{method:"POST"}); toast(`Scan: ${r.fired} signals`); loadDash(); };
 $("#btn-advance").onclick = async ()=>{
   toast("7 din aage… redemptions hote hain");
@@ -474,7 +486,7 @@ $("#btn-import").onclick = async ()=>{
   try{ upload=await csvForUpload(file); }catch(error){ toast("Import error: "+error.message); return; }
   const sampleRows=upload.text.split(/\r?\n/).filter(Boolean).length-1;
   const sampleNote=upload.sampled?` This 25 MB+ file will use ${sampleRows.toLocaleString("en-IN")} representative rows from ${upload.sourceRows.toLocaleString("en-IN")}; the original stays on this device.`:"";
-  if(!confirm("Replace the current demo workspace with this CSV?"+sampleNote)) return;
+  if(!confirm("Switch the active workspace from Sharma Tea Stall to this CSV? Questions will use your uploaded sales data."+sampleNote)) return;
   const button=$("#btn-import"); button.disabled=true; button.textContent="Importing…";
   try{
     const response=await fetch("/v1/import/transactions",{method:"POST",headers:{"Content-Type":"text/csv","X-Merchant-Name":$("#merchant-name").value.trim()||"My business"},body:upload.text});
@@ -482,7 +494,7 @@ $("#btn-import").onclick = async ()=>{
     try{ result=JSON.parse(raw); }catch(_){ throw new Error(response.ok?"The server returned an invalid response.":(raw||"Import failed.")); }
     if(!response.ok) throw new Error(result.detail||"Import failed");
     toast(`Imported ${result.imported.toLocaleString("en-IN")} rows${upload.sampled?" · representative sample":""}${result.skipped?` · skipped ${result.skipped}`:""}.`);
-    botSay(`Your CSV is ready: ${result.imported.toLocaleString("en-IN")} sales rows were imported${upload.sampled?" as a representative sample":""}. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);
+    botSay(`Your CSV is now the active workspace: ${result.imported.toLocaleString("en-IN")} sales rows were imported${upload.sampled?" as a representative sample":""}. Every question now uses this uploaded data. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);
     loadDash();
   }catch(error){ toast("Import error: "+error.message); }
   finally{ button.disabled=false; button.textContent="↑ Import sales CSV"; }
