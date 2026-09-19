@@ -1,0 +1,6 @@
+InvoiceDate,CustomerID,Description,Quantity,UnitPrice,Payment Method
+01/09/2026 09:10,CUST-1001,Masala chai,2,25,UPI
+01/09/2026 09:14,CUST-1002,Vegetable sandwich,1,60,Card
+02/09/2026 08:45,CUST-1001,Masala chai,1,25,UPI
+03/09/2026 18:20,CUST-1003,Cold coffee,2,80,Wallet
+04/09/2026 10:05,CUST-1002,Masala chai,1,25,Card

@@ -41,6 +41,7 @@
   .track{font-family:ui-monospace,monospace;font-size:11px}.track .st{display:inline-block;padding:2px 6px;margin:2px;border-radius:5px;background:var(--paper-muted);border:1px solid var(--line);color:var(--muted)}.track .st.on,.track .st.done{background:var(--accent-soft);border-color:#cdd0ff;color:var(--accent-ink);font-weight:700}
   .audit .row{font-size:11px;border-bottom:1px solid var(--line);padding:5px 2px;font-family:ui-monospace,monospace;cursor:pointer}.audit .row:hover{background:var(--paper-muted)}.audit .kind{color:var(--accent-ink)}
   .demo{display:flex;flex-direction:column;gap:6px}.demo .note{font-size:10px;color:var(--muted)}.demo button{width:100%;font-size:12px;padding:6px}.utility{padding:0}.utility summary{cursor:pointer;padding:12px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.utility summary::marker{color:var(--accent)}.utility .demo{padding:0 14px 14px}
+  .csv-field{width:100%;font:inherit;font-size:11px;border:1px solid var(--line-strong);background:var(--paper);border-radius:7px;padding:7px;color:var(--ink)}.import-warning{font-size:10px;color:var(--danger);line-height:1.35}
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 4px}.chips button{padding:5px 11px;font-size:11px;color:var(--muted);background:var(--paper);border-color:var(--line)}.chips button:hover{color:var(--accent-ink);border-color:var(--accent)}
   .toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:#fff;border-radius:10px;padding:10px 15px;font-size:13px;display:none;max-width:340px}.nums{font-variant-numeric:tabular-nums}.sm2{font-size:11px;color:var(--muted)}
   @media(max-width:1050px){.wrap{padding:24px 18px}.summary-grid{grid-template-columns:1fr 1fr}.summary-grid .utility{grid-column:1/-1}.workspace{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side .audit{grid-column:1/-1}}
@@ -73,6 +74,16 @@
         <button id="btn-measure"> 📊 <span data-i18n="measureOutcomes">Measure outcomes</span></button>
         <button id="btn-report"> 🧾 <span data-i18n="weeklyReport">Weekly report card</span></button>
         <div class="note" data-i18n="demoControls">Controls for the demo workspace.</div>
+      </div>
+    </details>
+    <details class="card utility">
+      <summary>Bring your data</summary>
+      <div class="demo">
+        <input class="csv-field" id="merchant-name" maxlength="80" placeholder="Business name" aria-label="Business name"/>
+        <input class="csv-field" id="csv-file" type="file" accept=".csv,text/csv" aria-label="Sales CSV file"/>
+        <button id="btn-import">↑ Import sales CSV</button>
+        <div class="note">Use date, customer ID, sales amount or quantity + unit price, and optional product/payment columns.</div>
+        <div class="import-warning">This replaces the demo workspace. Customer IDs are tokenized; contacts are not imported.</div>
       </div>
     </details>
   </section>
@@ -436,6 +447,22 @@ $("#btn-advance").onclick = async ()=>{
 };
 $("#btn-measure").onclick = async ()=>{ const m = await api("/v1/jobs/measure",{method:"POST"}); const rep = await api("/v1/report/weekly"); showReport(rep); loadDash(); };
 $("#btn-report").onclick = async ()=> showReport(await api("/v1/report/weekly"));
+$("#btn-import").onclick = async ()=>{
+  const file=$("#csv-file").files[0];
+  if(!file){ toast("Choose a CSV file first."); return; }
+  if(file.size>3*1024*1024){ toast("CSV is over 3 MB. Export a smaller date range."); return; }
+  if(!confirm("Replace the current demo workspace with this CSV?")) return;
+  const button=$("#btn-import"); button.disabled=true; button.textContent="Importing…";
+  try{
+    const response=await fetch("/v1/import/transactions",{method:"POST",headers:{"Content-Type":"text/csv","X-Merchant-Name":$("#merchant-name").value.trim()||"My business"},body:await file.text()});
+    const result=await response.json();
+    if(!response.ok) throw new Error(result.detail||"Import failed");
+    toast(`Imported ${result.imported.toLocaleString("en-IN")} rows${result.skipped?` · skipped ${result.skipped}`:""}.`);
+    botSay(`Your CSV is ready: ${result.imported.toLocaleString("en-IN")} sales rows were imported. Ask me what changed, which customers are becoming inactive, or what to do next.`, false);
+    loadDash();
+  }catch(error){ toast("Import error: "+error.message); }
+  finally{ button.disabled=false; button.textContent="↑ Import sales CSV"; }
+};
 function showReport(rep){
   const h = rep.headline, rr = rep.repeat_rate, treated = rr.treated_cohort_30d;
   botCard(`<h3>${t("weeklyReportCard")}</h3>

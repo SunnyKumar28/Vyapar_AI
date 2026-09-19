@@ -38,7 +38,7 @@ from .playbooks import engine
 from .outcomes import attribution, report_card
 from .trust import approvals, audit
 from .actions.connectors import world_sim
-from . import voice
+from . import importer, voice
 
 app = FastAPI(title="Vyapaar AI", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -316,6 +316,27 @@ def audit_view(trace_id: str | None = None, limit: int = 200) -> list[dict[str, 
 def health() -> dict[str, Any]:
     return {"ok": True, "now": iso(demo_now()), "provider": settings.agent.provider,
             "model": settings.agent.model, "voice": voice.status()}
+
+
+# ------------------------------------------------------------------ data import
+
+@app.post("/v1/import/transactions")
+async def import_transactions(request: Request) -> dict[str, Any]:
+    """Replace this single-user workspace with a validated POS/e-commerce CSV.
+
+    The browser sends `text/csv`; no raw customer identifier is written to the
+    database. This endpoint deliberately does not accept phone contacts, so an
+    imported dataset enables analytics but not outbound messaging by default.
+    """
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].lower()
+    if content_type not in {"text/csv", "application/csv", "text/plain"}:
+        raise HTTPException(415, "Upload a CSV file.")
+    try:
+        return importer.replace_workspace(
+            await request.body(), request.headers.get("x-merchant-name")
+        )
+    except importer.CsvImportError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 # ------------------------------------------------------------------ static SPA
